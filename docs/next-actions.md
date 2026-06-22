@@ -51,6 +51,8 @@ python automation/build_weekly_report.py --input data/samples/pdd_weekly_sample.
 - 脚本：`projects/pdd-weekly-notion-report/automation/build_weekly_report.py`
 - 样例数据：`projects/pdd-weekly-notion-report/data/samples/pdd_weekly_sample.csv`
 - 输出：`projects/pdd-weekly-notion-report/data/output/pdd_weekly_2026-W26.md`
+- 运行记录：`logs/script-runs.jsonl`
+- 状态查看：`python tools/workbench_status.py --script build_weekly_report.py`
 
 必须具备：
 

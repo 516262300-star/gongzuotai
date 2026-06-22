@@ -44,6 +44,35 @@ project-name/
 
 优先推进 `projects/pdd-weekly-notion-report/`，已创建第一版只读 dry-run 周报脚本。执行清单见 `docs/next-actions.md`。
 
+## 脚本运行状态
+
+工作台脚本统一记录运行历史到：
+
+```text
+logs/script-runs.jsonl
+```
+
+运行已接入的脚本时，会在终端显示：
+
+```text
+[运行中] script.py | 项目：project-id | 开始：YYYY-MM-DD HH:mm:ss Asia/Shanghai
+[成功] script.py | 完成：YYYY-MM-DD HH:mm:ss Asia/Shanghai | 耗时：1.23s
+```
+
+查看最近运行状态：
+
+```powershell
+python tools/workbench_status.py
+```
+
+查看某个脚本状态：
+
+```powershell
+python tools/workbench_status.py --script build_weekly_report.py
+```
+
+已登记脚本见 `registry/scripts.yml`。
+
 ## 凭据约定
 
 - 不提交真实账号、密码、cookie、token、API key。

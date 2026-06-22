@@ -32,6 +32,18 @@ data/output/pdd_weekly_2026-W26.md
 
 当前脚本只支持 dry-run，不会写入 Notion。
 
+运行时会自动显示状态，并写入工作台运行记录：
+
+```text
+logs/script-runs.jsonl
+```
+
+查看该脚本最近状态：
+
+```powershell
+python ..\..\tools\workbench_status.py --script build_weekly_report.py
+```
+
 ## 环境变量
 
 参考 `config/.env.example`。

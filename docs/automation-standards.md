@@ -25,6 +25,36 @@
 - 项目 `docs/runbook.md`。
 - 如存在外部 Notion/README/GitHub 文档，也要同步更新。
 
+## 运行记录和状态
+
+所有可重复运行的脚本都应接入工作台运行记录：
+
+- 运行中、成功、失败状态必须在终端可见。
+- 每次运行必须写入 `logs/script-runs.jsonl`。
+- 日志至少包含项目、脚本、开始时间、结束时间、状态、耗时、命令和说明。
+- 运行日志是本地运行产物，不提交到 Git。
+
+Python 脚本优先复用 `tools/workbench_log.py`：
+
+```python
+from workbench_log import run_logged
+
+if __name__ == "__main__":
+    raise SystemExit(
+        run_logged(
+            project="project-id",
+            script="script_name.py",
+            func=main,
+        )
+    )
+```
+
+查看最近状态：
+
+```powershell
+python tools/workbench_status.py
+```
+
 ## 命名约定
 
 - 项目目录使用小写英文和连字符，例如 `pdd-auto-listing`。
@@ -58,4 +88,3 @@ ADS_ACCESS_TOKEN=
 - 是否明确失败后是否重试。
 - 是否不会重复创建商品、周报或 Notion 记录。
 - 是否在 `README.md` 和 `docs/runbook.md` 中写清楚恢复步骤。
-

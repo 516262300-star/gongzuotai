@@ -13,6 +13,14 @@ from pathlib import Path
 from typing import Iterable
 
 
+WORKBENCH_ROOT = Path(__file__).resolve().parents[3]
+TOOLS_DIR = WORKBENCH_ROOT / "tools"
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
+
+from workbench_log import run_logged
+
+
 REQUIRED_COLUMNS = {
     "date",
     "shop_name",
@@ -323,4 +331,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(
+        run_logged(
+            project="pdd-weekly-notion-report",
+            script="build_weekly_report.py",
+            func=main,
+        )
+    )

@@ -1,0 +1,10 @@
+scripts:
+  - id: pdd-weekly-report-dry-run
+    project: pdd-weekly-notion-report
+    name: Notion 拼多多周报 dry-run
+    script: projects/pdd-weekly-notion-report/automation/build_weekly_report.py
+    command: python automation/build_weekly_report.py --input data/samples/pdd_weekly_sample.csv --week 2026-W26 --dry-run
+    workdir: projects/pdd-weekly-notion-report
+    status_command: python ../../tools/workbench_status.py --script build_weekly_report.py
+    writes_external_system: false
+

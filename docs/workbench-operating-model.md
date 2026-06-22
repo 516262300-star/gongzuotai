@@ -31,10 +31,15 @@
 - 失败后如何重试或恢复。
 - 如何避免重复创建记录或商品。
 
+所有自动化任务还必须写入工作台运行记录：
+
+- 本地日志：`logs/script-runs.jsonl`
+- 状态查看：`python tools/workbench_status.py`
+- 脚本登记：`registry/scripts.yml`
+
 ## 推荐推进顺序
 
 1. 先把 Notion 拼多多周报做成只读数据汇总和手动写入。
 2. 再做广告数据读取到 Notion，因为它和周报共享 Notion 字段、凭据和数据校验。
 3. 再做拼多多自动上架，先 dry-run 生成待上架清单。
 4. 最后接 ERP 自动上架，让 ERP 成为商品资料源。
-
