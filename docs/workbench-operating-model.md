@@ -56,5 +56,6 @@
 - 重新登录并同步：传给 `--relogin`。
 - 打开日志文件夹：打开 `D:\desktop\codex\guanggao\debug`。
 - 页面不再额外显示底部通用任务行；`pdd-ads-catchup` 和 `pdd-ads-sync-all` 仍作为底层任务保留，由广告同步专用按钮统一调用。
+- 广告同步历史会同时显示工作台按钮触发的手动运行记录和广告项目 `debug` 日志；手动同步成功后，不需要等外部项目生成新的 `task_*.log` 也能在历史里看到。
 
 真实执行仍然必须在网页输入 `EXECUTE`，避免误写 Notion。

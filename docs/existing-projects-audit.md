@@ -312,7 +312,7 @@ http://127.0.0.1:8787/
 | Agent | 历史来源 |
 | --- | --- |
 | 工作台运行记录 | `D:\desktop\codex\工作台\logs\script-runs.jsonl` |
-| 拼多多广告同步 | `D:\desktop\codex\guanggao\debug` |
+| 拼多多广告同步 | 工作台手动运行记录 `D:\desktop\codex\工作台\logs\script-runs.jsonl` + 外部项目日志 `D:\desktop\codex\guanggao\debug` |
 | 拼多多周报 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs` |
 | 拼多多自动上架 | `D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json` |
 | 小程序 ERP 自动上架 | `D:\desktop\codex\小程序自动上架\erp_auto_upload\logs` |

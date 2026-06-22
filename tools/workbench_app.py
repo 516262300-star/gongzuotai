@@ -1644,6 +1644,34 @@ def read_workbench_runs(limit: int = 20) -> list[dict[str, object]]:
     return rows[-limit:]
 
 
+def workbench_run_history_entry(row: dict[str, object], *, manual_label: bool = False) -> HistoryEntry:
+    status = "成功" if row.get("status") == "success" else "失败"
+    script = str(row.get("script") or "-")
+    task = TASKS.get(script)
+    title = task.name if task else script
+    if manual_label:
+        title = f"{title}（工作台手动）"
+    message = str(row.get("message") or "-")
+    command = str(row.get("command") or "-")
+    duration = row.get("duration_seconds")
+    summary_parts = [message]
+    if duration is not None:
+        summary_parts.append(f"耗时 {duration} 秒")
+    summary_parts.append(command)
+    details = [f"命令：{command}"]
+    workdir = row.get("workdir")
+    if workdir:
+        details.append(f"工作目录：{workdir}")
+    return HistoryEntry(
+        time=str(row.get("finished_at") or row.get("started_at") or "-")[:19].replace("T", " "),
+        status=status,
+        title=title,
+        summary=" | ".join(summary_parts),
+        source=str(LOG_PATH),
+        details=details,
+    )
+
+
 def read_json_file(path: Path) -> object | None:
     if not path.exists():
         return None
@@ -1669,19 +1697,7 @@ def history_agents() -> list[dict[str, str]]:
 
 def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
     if agent == "workbench":
-        entries = []
-        for row in reversed(read_workbench_runs(limit)):
-            status = "成功" if row.get("status") == "success" else "失败"
-            entries.append(
-                HistoryEntry(
-                    time=str(row.get("finished_at") or row.get("started_at") or "-")[:19].replace("T", " "),
-                    status=status,
-                    title=str(row.get("script") or "-"),
-                    summary=str(row.get("message") or row.get("command") or "-"),
-                    source=str(LOG_PATH),
-                )
-            )
-        return entries
+        return [workbench_run_history_entry(row) for row in reversed(read_workbench_runs(limit))]
 
     if agent == "pdd_publisher":
         config = PROJECTS["pdd_publisher"]
@@ -1721,11 +1737,20 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
     if not isinstance(log_dir, Path) or not isinstance(patterns, list):
         return []
 
+    entries = []
+    if agent == "pdd_ads":
+        ads_scripts = {"pdd-ads-sync-all", "pdd-ads-catchup"}
+        workbench_rows = [
+            row
+            for row in read_workbench_runs(max(limit * 10, 100))
+            if row.get("project") == "pdd-ads-to-notion" and row.get("script") in ads_scripts
+        ]
+        entries.extend(workbench_run_history_entry(row, manual_label=True) for row in workbench_rows)
+
     files = []
     for pattern in patterns:
         files.extend(path for path in log_dir.glob(pattern) if path.is_file())
     files = sorted(set(files), key=lambda path: path.stat().st_mtime, reverse=True)[:limit]
-    entries = []
     for path in files:
         text = read_text_tail(path, 220)
         status = classify_history_status(agent, text)
@@ -1739,7 +1764,7 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
                 source=str(path),
             )
         )
-    return entries
+    return sorted(entries, key=lambda item: item.time, reverse=True)[:limit]
 
 
 def collect_erp_miniapp_history(limit: int = 20) -> list[HistoryEntry]:
