@@ -258,3 +258,16 @@ python tools\workbench_external_status.py
 
 这个命令只读取四个项目的日志和历史文件，不执行同步、不写 Notion、不打开浏览器、不保存商品。
 
+## 工作台统一启动
+
+当前已提供统一启动入口：
+
+```powershell
+cd D:\desktop\codex\工作台
+python tools\workbench_run.py --list
+python tools\workbench_run.py status
+python tools\workbench_run.py pdd-ads-catchup --dry-run
+python tools\workbench_run.py pdd-ads-catchup --execute
+```
+
+除 `status` 外，真实启动都必须显式添加 `--execute`，防止误触发写入 Notion、打开浏览器或启动上架工具。

@@ -8,6 +8,15 @@ scripts:
     status_command: python tools\workbench_external_status.py
     writes_external_system: false
 
+  - id: workbench-run
+    project: workbench
+    name: 工作台统一启动入口
+    script: tools\workbench_run.py
+    command: python tools\workbench_run.py --list
+    workdir: D:\desktop\codex\工作台
+    status_command: python tools\workbench_status.py --script workbench-run
+    writes_external_system: false
+
   - id: pdd-ads-sync-all
     project: pdd-ads-to-notion
     name: 拼多多广告同步一到七店

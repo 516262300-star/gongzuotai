@@ -47,10 +47,12 @@
 给工作台增加启动命令，不直接改四个项目内部逻辑：
 
 ```powershell
-python tools/workbench_run.py pdd-ads-yesterday
-python tools/workbench_run.py pdd-weekly-report
-python tools/workbench_run.py pdd-publisher
-python tools/workbench_run.py erp-miniapp-upload
+python tools/workbench_run.py --list
+python tools/workbench_run.py pdd-ads-catchup --dry-run
+python tools/workbench_run.py pdd-ads-catchup --execute
+python tools/workbench_run.py pdd-weekly-report --execute
+python tools/workbench_run.py pdd-publisher --execute
+python tools/workbench_run.py erp-miniapp-upload --execute
 ```
 
 要求：
@@ -58,6 +60,9 @@ python tools/workbench_run.py erp-miniapp-upload
 - 调用现有项目命令。
 - 每次运行写入工作台 `logs/script-runs.jsonl`。
 - 不读取或提交真实 `.env`、登录态、`config.yaml`。
+- 除 `status` 外，真实启动都必须显式添加 `--execute`。
+
+当前已完成命令：`python tools/workbench_run.py --list`。
 
 ## 第 4 步：再考虑迁移代码
 

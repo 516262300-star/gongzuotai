@@ -78,6 +78,17 @@ python tools/workbench_status.py
 python tools/workbench_external_status.py
 ```
 
+查看和启动已登记任务：
+
+```powershell
+python tools\workbench_run.py --list
+python tools\workbench_run.py status
+python tools\workbench_run.py pdd-weekly-report --dry-run
+python tools\workbench_run.py pdd-weekly-report --execute
+```
+
+除 `status` 外，真实启动都必须加 `--execute`。
+
 查看某个已接入工作台运行记录的脚本状态：
 
 ```powershell
