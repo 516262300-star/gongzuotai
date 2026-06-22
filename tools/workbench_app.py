@@ -72,11 +72,62 @@ INDEX_HTML = r"""<!doctype html>
       display: grid;
       grid-template-columns: 318px minmax(0, 1fr);
       min-height: 100vh;
+      padding-top: 48px;
+    }
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      z-index: 5;
+    }
+    .topbrand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 750;
+    }
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .breadcrumb { color: var(--muted); font-weight: 500; }
+    .top-actions { display: flex; align-items: center; gap: 12px; color: var(--muted); }
+    .local-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--good);
+    }
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      min-height: 30px;
+      padding: 0;
+      color: var(--muted);
     }
     aside {
       position: sticky;
-      top: 0;
-      height: 100vh;
+      top: 48px;
+      height: calc(100vh - 48px);
       padding: 18px 14px;
       background: var(--surface);
       color: var(--text);
@@ -96,6 +147,32 @@ INDEX_HTML = r"""<!doctype html>
       gap: 10px;
       padding: 14px 8px 10px;
     }
+    .agent-list-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 750;
+    }
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      min-height: 30px;
+      padding: 0 10px;
+      border-color: var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .filter-chip.active {
+      background: var(--accent-weak);
+      border-color: #b8cffb;
+      color: var(--accent);
+    }
     .agent-search {
       width: 100%;
       padding: 0 10px;
@@ -109,11 +186,11 @@ INDEX_HTML = r"""<!doctype html>
     }
     .agent-button {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 6px 10px;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 5px 10px;
       align-items: center;
       width: 100%;
-      min-height: 72px;
+      min-height: 86px;
       padding: 10px;
       border: 1px solid transparent;
       border-radius: 8px;
@@ -123,9 +200,41 @@ INDEX_HTML = r"""<!doctype html>
     }
     .agent-button:hover { background: var(--surface-soft); border-color: var(--line); }
     .agent-button.active { background: var(--accent-weak); border-color: #b8cffb; }
-    .agent-name { font-weight: 700; overflow-wrap: anywhere; }
-    .agent-sub { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
-    .agent-count { color: var(--muted); font-size: 12px; }
+    .agent-icon {
+      grid-column: 1;
+      grid-row: 1 / 4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+    }
+    .icon-workbench { background: #475569; }
+    .icon-pdd_ads, .icon-pdd_publisher { background: #dc2626; }
+    .icon-pdd_weekly { background: #111827; }
+    .icon-erp_miniapp { background: #2563eb; }
+    .agent-name { grid-column: 2; grid-row: 1; font-weight: 700; overflow-wrap: anywhere; }
+    .agent-button .badge { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
+    .agent-sub { grid-column: 2 / 4; grid-row: 2; color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+    .agent-count { grid-column: 2; grid-row: 3; color: var(--muted); font-size: 12px; }
+    .risk {
+      grid-column: 3;
+      grid-row: 3;
+      justify-self: end;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .sidebar-foot {
+      padding: 12px 8px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
     nav { display: grid; gap: 6px; padding: 16px 0; }
     nav a {
       display: flex;
@@ -250,14 +359,17 @@ INDEX_HTML = r"""<!doctype html>
     }
     .detail-title {
       display: grid;
-      gap: 5px;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 5px 12px;
       min-width: 0;
     }
+    .detail-title .agent-icon { grid-row: span 3; width: 40px; height: 40px; }
     .detail-title h3 { font-size: 20px; }
+    .detail-title h3, .detail-title .summary, .detail-title .path { grid-column: 2; }
     .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .detail-metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 10px;
     }
     .mini-metric {
@@ -304,6 +416,111 @@ INDEX_HTML = r"""<!doctype html>
       border-bottom: 1px solid var(--line);
       background: var(--surface-soft);
       line-height: 1.5;
+    }
+    .run-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, .9fr) minmax(380px, 1.1fr);
+      gap: 14px;
+      padding: 14px 16px;
+    }
+    .run-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      gap: 12px;
+    }
+    .run-box h4 {
+      margin: 0;
+      font-size: 14px;
+    }
+    .control-grid {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+    .fake-select {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+    .command-preview {
+      min-height: 170px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #334155;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+    .run-inline-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ads-panel {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+    .ads-panel h4 {
+      margin: 0 0 6px;
+      font-size: 17px;
+    }
+    .ads-panel .summary {
+      margin-bottom: 14px;
+    }
+    .ads-form {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr)) minmax(170px, auto);
+      gap: 12px 14px;
+      align-items: end;
+      max-width: 980px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    .field label {
+      color: var(--text);
+      font-weight: 650;
+      font-size: 13px;
+    }
+    .field input, .field select {
+      min-width: 0;
+      width: 100%;
+      padding: 0 10px;
+    }
+    .check-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      color: var(--text);
+      font-weight: 650;
+    }
+    .check-field input {
+      width: 16px;
+      min-height: 16px;
+    }
+    .ads-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .ads-actions .right-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     .grid {
       display: grid;
@@ -398,6 +615,11 @@ INDEX_HTML = r"""<!doctype html>
       border: 1px solid transparent;
       flex: 0 0 auto;
     }
+    .agent-button .badge {
+      width: fit-content;
+      justify-self: end;
+      align-self: start;
+    }
     .success { color: var(--good); background: #eaf7ef; border-color: #b9e4c6; }
     .failed { color: var(--bad); background: #fff1f0; border-color: #efaaa5; }
     .warning { color: var(--warn); background: #fff7e6; border-color: #ffd591; }
@@ -478,6 +700,8 @@ INDEX_HTML = r"""<!doctype html>
       }
       .brand { padding-bottom: 10px; }
       .agent-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .run-grid { grid-template-columns: 1fr; }
       nav {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         padding: 12px 0 0;
@@ -493,8 +717,13 @@ INDEX_HTML = r"""<!doctype html>
       .agent-list { grid-template-columns: 1fr; }
       .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .detail-title-row { display: grid; }
+      .detail-title { grid-template-columns: 40px minmax(0, 1fr); }
       .detail-actions { justify-content: flex-start; }
       .detail-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .run-grid { padding: 12px; }
+      .ads-form { grid-template-columns: 1fr; }
+      .ads-actions .right-actions { margin-left: 0; }
+      .control-grid { grid-template-columns: 1fr; }
       .task-grid, .confirm { grid-template-columns: 1fr; }
       .task-actions { justify-content: flex-start; }
       select { min-width: 0; width: 100%; }
@@ -503,16 +732,42 @@ INDEX_HTML = r"""<!doctype html>
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <div class="topbrand">
+      <span class="logo-mark">W</span>
+      <span>自动化控制台</span>
+      <span class="breadcrumb">/ 个人工作台</span>
+    </div>
+    <div class="top-actions">
+      <span class="local-dot"></span>
+      <span>本机 127.0.0.1</span>
+      <button class="icon-btn" type="button" title="设置">⚙</button>
+      <button class="icon-btn" type="button" title="帮助">?</button>
+      <span>运营同学</span>
+    </div>
+  </div>
   <div class="app-shell">
     <aside>
       <div class="brand">
-        <h1>个人工作台</h1>
+        <h1>Agent 列表 (<span id="agentTotal">0</span>)</h1>
         <div class="brand-sub">ERP、Notion、拼多多、小程序自动化统一入口</div>
       </div>
       <div class="agent-tools">
-        <input class="agent-search" id="agentSearch" placeholder="搜索 agent" />
+        <div class="agent-list-head">
+          <span>筛选</span>
+          <button class="icon-btn" id="clearSearchBtn" type="button" title="清空搜索">×</button>
+        </div>
+        <input class="agent-search" id="agentSearch" placeholder="搜索 Agent 名称 / 备注 / 命令..." />
+        <div class="filter-row" id="agentFilters">
+          <button class="filter-chip active" data-filter="all" type="button">全部 <span id="filterAll">0</span></button>
+          <button class="filter-chip" data-filter="成功" type="button">成功 <span id="filterSuccess">0</span></button>
+          <button class="filter-chip" data-filter="警告" type="button">警告 <span id="filterWarning">0</span></button>
+          <button class="filter-chip" data-filter="失败" type="button">失败 <span id="filterFailed">0</span></button>
+          <button class="filter-chip" data-filter="未运行" type="button">未运行 <span id="filterIdle">0</span></button>
+        </div>
       </div>
       <div class="agent-list" id="agentList"></div>
+      <div class="sidebar-foot" id="agentTotalFoot">共 0 项</div>
       <div class="nav-note">真实任务需要输入 EXECUTE。状态检查和历史查看只读，不会写 Notion 或执行上架。</div>
     </aside>
     <div class="content">
@@ -529,6 +784,7 @@ INDEX_HTML = r"""<!doctype html>
       <section class="detail-header">
         <div class="detail-title-row">
           <div class="detail-title">
+            <span class="agent-icon icon-erp_miniapp" id="selectedAgentIcon">ERP</span>
             <h3 id="selectedAgentName">读取中</h3>
             <div class="summary" id="selectedAgentSummary">正在读取 agent 状态。</div>
             <div class="path" id="selectedAgentSource">-</div>
@@ -587,7 +843,17 @@ INDEX_HTML = r"""<!doctype html>
     const agentSelect = document.getElementById("agentSelect");
     const agentList = document.getElementById("agentList");
     const agentSearch = document.getElementById("agentSearch");
+    const agentFilters = document.getElementById("agentFilters");
+    const agentTotal = document.getElementById("agentTotal");
+    const agentTotalFoot = document.getElementById("agentTotalFoot");
+    const filterAll = document.getElementById("filterAll");
+    const filterSuccess = document.getElementById("filterSuccess");
+    const filterWarning = document.getElementById("filterWarning");
+    const filterFailed = document.getElementById("filterFailed");
+    const filterIdle = document.getElementById("filterIdle");
+    const clearSearchBtn = document.getElementById("clearSearchBtn");
     const selectedAgentName = document.getElementById("selectedAgentName");
+    const selectedAgentIcon = document.getElementById("selectedAgentIcon");
     const selectedAgentSummary = document.getElementById("selectedAgentSummary");
     const selectedAgentSource = document.getElementById("selectedAgentSource");
     const agentMetrics = document.getElementById("agentMetrics");
@@ -621,13 +887,65 @@ INDEX_HTML = r"""<!doctype html>
       "pdd-publisher": "pdd_publisher",
       "erp-miniapp-upload": "erp_miniapp"
     };
+    const agentIcons = {
+      workbench: "工",
+      pdd_ads: "拼",
+      pdd_weekly: "周",
+      pdd_publisher: "上",
+      erp_miniapp: "ERP"
+    };
+    const riskMap = {
+      workbench: "低风险",
+      pdd_ads: "中风险",
+      pdd_weekly: "中风险",
+      pdd_publisher: "低风险",
+      erp_miniapp: "中风险"
+    };
+    const scheduleMap = {
+      workbench: "手动",
+      pdd_ads: "明日 09:00",
+      pdd_weekly: "下周一 10:00",
+      pdd_publisher: "手动",
+      erp_miniapp: "手动"
+    };
     let allAgents = [];
     let allStatuses = [];
     let allTasks = [];
     let selectedAgent = "erp_miniapp";
+    let agentFilter = "all";
     let runningTask = null;
     let runningTimer = null;
     let runningStartedAt = 0;
+    let activeRunController = null;
+
+    function agentIcon(agentId) {
+      return agentIcons[agentId] || "A";
+    }
+
+    function riskForAgent(agentId) {
+      return riskMap[agentId] || "低风险";
+    }
+
+    function agentSubtitle(agentId) {
+      const task = tasksForAgent(agentId)[0];
+      return `${task ? task.id : agentId} | 外部系统`;
+    }
+
+    function successRate(status) {
+      if (status === "成功") return "100%";
+      if (status === "失败") return "0%";
+      if (status === "警告") return "需复核";
+      return "-";
+    }
+
+    function defaultYesterday() {
+      const date = new Date();
+      date.setDate(date.getDate() - 1);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
 
     async function fetchJSON(url, options) {
       const response = await fetch(url, options);
@@ -682,32 +1000,56 @@ INDEX_HTML = r"""<!doctype html>
 
     function renderAgentList() {
       const query = (agentSearch.value || "").trim().toLowerCase();
-      const filtered = allAgents.filter(agent => !query || agent.name.toLowerCase().includes(query) || agent.id.includes(query));
+      agentTotal.textContent = String(allAgents.length);
+      agentTotalFoot.textContent = `共 ${allAgents.length} 项`;
+      const counts = { all: allAgents.length, "成功": 0, "警告": 0, "失败": 0, "未运行": 0 };
+      allAgents.forEach(agent => {
+        const currentStatus = statusForAgent(agent.id).status || "未知";
+        if (counts[currentStatus] !== undefined) counts[currentStatus] += 1;
+      });
+      filterAll.textContent = String(counts.all);
+      filterSuccess.textContent = String(counts["成功"]);
+      filterWarning.textContent = String(counts["警告"]);
+      filterFailed.textContent = String(counts["失败"]);
+      filterIdle.textContent = String(counts["未运行"]);
+
+      const filtered = allAgents.filter(agent => {
+        const status = statusForAgent(agent.id);
+        const haystack = `${agent.name} ${agent.id} ${status.summary || ""} ${agentSubtitle(agent.id)}`.toLowerCase();
+        const matchesQuery = !query || haystack.includes(query);
+        const matchesFilter = agentFilter === "all" || status.status === agentFilter;
+        return matchesQuery && matchesFilter;
+      });
       agentList.innerHTML = filtered.map(agent => {
         const status = statusForAgent(agent.id);
-        const taskCount = tasksForAgent(agent.id).length;
         return `
           <button class="agent-button ${agent.id === selectedAgent ? "active" : ""}" data-agent="${escapeHTML(agent.id)}" type="button">
+            <span class="agent-icon icon-${escapeHTML(agent.id)}">${escapeHTML(agentIcon(agent.id))}</span>
             <span class="agent-name">${escapeHTML(agent.name)}</span>
             <span class="badge ${badgeClass(status.status)}">${escapeHTML(status.status)}</span>
-            <span class="agent-sub">${escapeHTML(status.summary)}</span>
-            <span class="agent-count">${taskCount} 个任务</span>
+            <span class="agent-sub">${escapeHTML(agentSubtitle(agent.id))}</span>
+            <span class="agent-count">最近运行：${escapeHTML(status.latest_time || "-")}</span>
+            <span class="risk">${escapeHTML(riskForAgent(agent.id))}</span>
           </button>
         `;
-      }).join("");
+      }).join("") || `<div class="empty">没有匹配的 Agent。</div>`;
     }
 
     function renderSelectedAgent() {
       const status = statusForAgent(selectedAgent);
       const tasks = tasksForAgent(selectedAgent);
+      selectedAgentIcon.className = `agent-icon icon-${selectedAgent}`;
+      selectedAgentIcon.textContent = agentIcon(selectedAgent);
       selectedAgentName.textContent = status.name || agentName(selectedAgent);
       selectedAgentSummary.textContent = status.summary || "-";
       selectedAgentSource.textContent = status.source || "-";
       agentMetrics.innerHTML = [
         ["状态", status.status || "未知"],
-        ["最近时间", status.latest_time || "-"],
-        ["任务数", String(tasks.length)],
-        ["建议", status.next_action || "-"]
+        ["风险等级", riskForAgent(selectedAgent)],
+        ["最近运行", status.latest_time || "-"],
+        ["下次计划运行", scheduleMap[selectedAgent] || "手动"],
+        ["成功率（近 7 天）", successRate(status.status)],
+        ["最近结果", status.status || "未知"]
       ].map(([label, value]) => `
         <div class="mini-metric">
           <strong>${escapeHTML(value)}</strong>
@@ -803,7 +1145,9 @@ INDEX_HTML = r"""<!doctype html>
         taskList.innerHTML = `<div class="empty">当前 agent 暂无可执行任务。</div>`;
         return;
       }
-      taskList.innerHTML = tasks.map(task => `
+      const adsPanel = selectedAgent === "pdd_ads" ? renderAdsPanel() : "";
+      const runPanel = renderRunPanel(tasks);
+      taskList.innerHTML = adsPanel + runPanel + tasks.map(task => `
         <div class="task-row">
           <div class="task-grid">
             <div>
@@ -819,6 +1163,106 @@ INDEX_HTML = r"""<!doctype html>
           </div>
         </div>
       `).join("");
+    }
+
+    function renderRunPanel(tasks) {
+      const firstTask = tasks[0];
+      const command = commandPreview(firstTask);
+      return `
+        <div class="run-grid">
+          <div class="run-box">
+            <h4>执行控制</h4>
+            <div class="control-grid">
+              <span>运行模式</span><span class="fake-select">${firstTask.writes_external_system ? "真实执行（写操作）" : "本地启动 / 只读"}</span>
+              <span>目标环境</span><span class="fake-select">本机 127.0.0.1</span>
+              <span>预览范围</span><span class="fake-select">${tasks.length > 1 ? `${tasks.length} 个任务` : "当前任务"}</span>
+              <span>执行窗口</span><span class="fake-select">${firstTask.detached ? "后台启动" : "等待完成"}</span>
+            </div>
+            <label class="check-field"><input type="checkbox" checked disabled /> 执行前先预览（推荐）</label>
+            <label class="check-field"><input type="checkbox" checked disabled /> 输出实时滚动显示</label>
+            <div class="run-inline-actions">
+              <button class="${firstTask.writes_external_system ? "danger" : ""}" data-task="${escapeHTML(firstTask.id)}" data-mode="execute" type="button">执行（写入）</button>
+              <button data-task="${escapeHTML(firstTask.id)}" data-mode="dry-run" type="button">预览（只读）</button>
+            </div>
+          </div>
+          <div class="run-box">
+            <h4>命令预览</h4>
+            <pre class="command-preview">${escapeHTML(command)}</pre>
+            <div class="panel-note">说明：预览只展示工作台将执行的命令；真实写入仍需要输入 EXECUTE。</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function commandPreview(task) {
+      if (!task) return "";
+      return `${task.command}\n\n工作目录：${task.workdir}\n写外部系统：${task.writes_external_system ? "是" : "否"}`;
+    }
+
+    function renderAdsPanel() {
+      const date = defaultYesterday();
+      return `
+        <div class="ads-panel">
+          <h4>拼多多广告数据同步</h4>
+          <div class="summary">默认同步一到七店。ERP 登录过期时会优先用 .env 里的账号密码自动登录，失败时再按日志提示处理。</div>
+          <div class="ads-form">
+            <div class="field">
+              <label for="adsSingleDate">单日日期</label>
+              <input id="adsSingleDate" type="date" value="${escapeHTML(date)}" />
+            </div>
+            <div class="field">
+              <label for="adsStore">店铺</label>
+              <select id="adsStore">
+                <option value="all">all</option>
+                <option value="22">一店 22</option>
+                <option value="23">二店 23</option>
+                <option value="24">三店 24</option>
+                <option value="25">四店 25</option>
+                <option value="26">五店 26</option>
+                <option value="27">六店 27</option>
+                <option value="28">七店 28</option>
+              </select>
+            </div>
+            <label class="check-field">
+              <input id="adsCheckOnly" type="checkbox" />
+              只检查，不写入 Notion
+            </label>
+            <div class="field">
+              <label for="adsRangeStart">范围开始</label>
+              <input id="adsRangeStart" type="date" value="${escapeHTML(date)}" />
+            </div>
+            <div class="field">
+              <label for="adsRangeEnd">范围结束</label>
+              <input id="adsRangeEnd" type="date" value="${escapeHTML(date)}" />
+            </div>
+          </div>
+          <div class="ads-actions">
+            <button data-ads-action="yesterday" type="button">同步昨天</button>
+            <button data-ads-action="single" type="button">同步单日</button>
+            <button data-ads-action="range" type="button">同步日期范围</button>
+            <button data-ads-action="relogin" type="button">重新登录并同步</button>
+            <div class="right-actions">
+              <button data-ads-action="stop" type="button">停止当前运行</button>
+              <button data-ads-action="open-log" type="button">打开日志文件夹</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function adsOptions(action) {
+      const singleDate = document.getElementById("adsSingleDate")?.value || defaultYesterday();
+      const rangeStart = document.getElementById("adsRangeStart")?.value || singleDate;
+      const rangeEnd = document.getElementById("adsRangeEnd")?.value || rangeStart;
+      const store = document.getElementById("adsStore")?.value || "all";
+      const checkOnly = Boolean(document.getElementById("adsCheckOnly")?.checked);
+      if (action === "range") {
+        return { date_range: `${rangeStart}~${rangeEnd}`, store, check_only: checkOnly };
+      }
+      if (action === "relogin") {
+        return { date: singleDate, store, check_only: checkOnly, relogin: true };
+      }
+      return { date: singleDate, store, check_only: checkOnly };
     }
 
     function setButtonsDisabled(disabled) {
@@ -863,19 +1307,43 @@ INDEX_HTML = r"""<!doctype html>
       setButtonsDisabled(false);
     }
 
-    async function runTask(task, mode) {
+    async function openLogFolder() {
+      try {
+        await fetchJSON("/api/open-path", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: "D:\\desktop\\codex\\guanggao\\debug" })
+        });
+        appendOutput("\n[工作台] 已请求打开日志文件夹：D:\\desktop\\codex\\guanggao\\debug\n");
+      } catch (error) {
+        appendOutput(`\n[工作台] 打开日志文件夹失败：${error.message}\n`);
+      }
+    }
+
+    function stopCurrentRun() {
+      if (!activeRunController || !runningTask) {
+        appendOutput("\n[工作台] 当前没有正在运行的任务。\n");
+        return;
+      }
+      activeRunController.abort();
+      appendOutput("\n[工作台] 已发送停止请求，正在等待脚本退出。\n");
+    }
+
+    async function runTask(task, mode, options = {}) {
       if (runningTask) {
         writeOutput(`已有任务正在运行：${runningTask}\n请等待完成后再执行其他任务。`);
         return;
       }
       startRunTimer(task, mode);
       let success = false;
+      activeRunController = new AbortController();
       try {
-        const payload = { task, mode, confirm: confirmText.value };
+        const payload = { task, mode, confirm: confirmText.value, options };
         const response = await fetch("/api/run", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: activeRunController.signal
         });
         if (!response.ok) {
           const text = await response.text();
@@ -898,8 +1366,10 @@ INDEX_HTML = r"""<!doctype html>
         await loadStatus();
         await loadHistory();
       } catch (error) {
-        appendOutput(`\n${error.message}\n`);
+        appendOutput(`\n${error.name === "AbortError" ? "任务已停止。" : error.message}\n`);
         stopRunTimer(false);
+      } finally {
+        activeRunController = null;
       }
     }
 
@@ -930,6 +1400,17 @@ INDEX_HTML = r"""<!doctype html>
     document.getElementById("statusBtn").addEventListener("click", () => runTask("status", "execute"));
     document.getElementById("clearOutputBtn").addEventListener("click", () => writeOutput("等待操作。"));
     agentSearch.addEventListener("input", renderAgentList);
+    clearSearchBtn.addEventListener("click", () => {
+      agentSearch.value = "";
+      renderAgentList();
+    });
+    agentFilters.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-filter]");
+      if (!button) return;
+      agentFilter = button.dataset.filter;
+      document.querySelectorAll(".filter-chip").forEach(chip => chip.classList.toggle("active", chip === button));
+      renderAgentList();
+    });
     agentSelect.addEventListener("change", () => selectAgent(agentSelect.value));
     agentList.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-agent]");
@@ -942,6 +1423,14 @@ INDEX_HTML = r"""<!doctype html>
       activateTab(button.dataset.tab);
     });
     taskList.addEventListener("click", (event) => {
+      const adsButton = event.target.closest("button[data-ads-action]");
+      if (adsButton) {
+        const action = adsButton.dataset.adsAction;
+        if (action === "stop") return stopCurrentRun();
+        if (action === "open-log") return openLogFolder();
+        const options = adsOptions(action);
+        return runTask("pdd-ads-sync-all", "execute", options);
+      }
       const button = event.target.closest("button[data-task]");
       if (!button) return;
       runTask(button.dataset.task, button.dataset.mode);
@@ -1009,6 +1498,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if path == "/api/open-path":
+            self.handle_open_path()
+            return
         if path != "/api/run":
             self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
             return
@@ -1024,6 +1516,7 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         task_id = str(payload.get("task") or "")
         mode = str(payload.get("mode") or "dry-run")
         confirm = str(payload.get("confirm") or "")
+        options = payload.get("options") if isinstance(payload.get("options"), dict) else {}
         if task_id not in TASKS:
             self.send_json({"error": f"未知任务：{task_id}"}, HTTPStatus.BAD_REQUEST)
             return
@@ -1035,12 +1528,57 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             return
 
         command = [sys.executable, str(WORKBENCH_ROOT / "tools" / "workbench_run.py"), task_id]
+        command.extend(self.option_args(task_id, options))
         if mode == "dry-run":
             command.append("--dry-run")
         else:
             command.append("--execute")
 
         self.stream_command(command)
+
+    def option_args(self, task_id: str, options: dict[str, object]) -> list[str]:
+        if task_id not in {"pdd-ads-sync-all", "pdd-ads-catchup"}:
+            return []
+        args: list[str] = []
+        if options.get("date"):
+            args.extend(["--date", str(options["date"])])
+        if options.get("date_range"):
+            args.extend(["--range", str(options["date_range"])])
+        if options.get("store"):
+            args.extend(["--store", str(options["store"])])
+        if options.get("relogin"):
+            args.append("--relogin")
+        if options.get("check_only"):
+            args.append("--check-only")
+        return args
+
+    def handle_open_path(self) -> None:
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            body = self.rfile.read(length).decode("utf-8")
+            payload = json.loads(body or "{}")
+        except (ValueError, json.JSONDecodeError):
+            self.send_json({"error": "请求 JSON 无效"}, HTTPStatus.BAD_REQUEST)
+            return
+
+        requested = Path(str(payload.get("path") or ""))
+        allowed = [
+            Path(r"D:\desktop\codex\guanggao\debug"),
+            WORKBENCH_ROOT / "logs",
+        ]
+        if requested not in allowed:
+            self.send_json({"error": "不允许打开这个路径"}, HTTPStatus.BAD_REQUEST)
+            return
+        requested.mkdir(parents=True, exist_ok=True)
+        try:
+            if os.name == "nt":
+                subprocess.Popen(["explorer", str(requested)])
+            else:
+                subprocess.Popen(["xdg-open", str(requested)])
+        except OSError as exc:
+            self.send_json({"error": str(exc)}, HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
+        self.send_json({"ok": True, "path": str(requested)})
 
     def stream_command(self, command: list[str]) -> None:
         self.send_response(HTTPStatus.OK)

@@ -44,3 +44,16 @@
 3. 再做统一启动入口，调用现有项目命令并写入工作台运行记录。当前命令：`python tools/workbench_run.py --list`。
 4. 再做本地网页工作台。当前命令：`python tools/workbench_app.py`。
 5. 最后再考虑是否把现有项目迁入 `projects/`，迁移前必须同步 README、runbook 和任务计划路径。
+
+## 拼多多广告同步网页控制
+
+工作台里的 `拼多多广告同步` Agent 不是普通任务列表，它需要保留原本本地桌面脚本的关键控制项：
+
+- 单日日期：传给 `tools/workbench_run.py pdd-ads-sync-all --date YYYY-MM-DD`。
+- 日期范围：传给 `tools/workbench_run.py pdd-ads-sync-all --range YYYY-MM-DD~YYYY-MM-DD`。
+- 店铺：传给 `--store all` 或具体店铺 ID。
+- 只检查、不写入 Notion：传给工作台 `--check-only`，由工作台转为广告脚本的 `--dry-run`。
+- 重新登录并同步：传给 `--relogin`。
+- 打开日志文件夹：打开 `D:\desktop\codex\guanggao\debug`。
+
+真实执行仍然必须在网页输入 `EXECUTE`，避免误写 Notion。

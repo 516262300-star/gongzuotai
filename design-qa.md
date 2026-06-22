@@ -4,10 +4,10 @@
 
 **Implementation Evidence**
 - URL: `http://127.0.0.1:8787/`
-- Desktop screenshot: `D:\desktop\codex\工作台\logs\workbench_agent_detail_workspace.png`
-- Mobile screenshot: `D:\desktop\codex\工作台\logs\workbench_agent_detail_mobile.png`
+- Desktop screenshot: `D:\desktop\codex\工作台\logs\workbench_agent_detail_ads_desktop.png`
+- Mobile screenshot: `D:\desktop\codex\工作台\logs\workbench_agent_detail_ads_mobile.png`
 - Viewports: desktop `1440x980`, mobile `390x1000`
-- State: `小程序 ERP 自动上架` selected, `历史` tab checked on desktop and mobile.
+- State: `拼多多广告同步` selected, `运行` tab checked on desktop and mobile.
 
 **Findings**
 - No P0/P1/P2 findings.
@@ -25,10 +25,13 @@
 - Added functional tabs: `运行`, `历史`, `日志`, `文件`.
 - Scoped the run list to the selected Agent.
 - Kept live streaming output and guarded execution behavior.
+- Added the option-3 top control bar, Agent icons, status filters, risk labels, six-metric detail header, and command preview area.
+- Added a dedicated `拼多多广告数据同步` panel matching the local desktop script controls: single date, range start/end, store, check-only, sync buttons, stop button, and log-folder button.
+- Extended `tools/workbench_run.py` so the workbench can pass ads sync `--date`, `--range`, `--store`, `--relogin`, and `--check-only` into the existing `guanggao` scripts.
 
 **Follow-up Polish**
-- P3: Add richer command previews inside the `运行` tab for each task.
-- P3: Add small filters in the left Agent list for `成功`, `失败`, `警告`, and `未运行`.
+- P3: Add per-run parsed counters for ads sync output, similar to the ERP miniapp history details.
+- P3: Add real schedule data if Windows Task Scheduler entries are later normalized into the workbench registry.
 
 **Final Result**
 - final result: passed

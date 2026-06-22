@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
@@ -96,6 +97,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--json", action="store_true", help="配合 --list 输出 JSON。")
     parser.add_argument("--dry-run", action="store_true", help="只显示将要执行的命令，不启动。")
     parser.add_argument("--execute", action="store_true", help="确认执行任务。除 status 外都需要显式提供。")
+    parser.add_argument("--date", help="广告同步单日日期，格式 YYYY-MM-DD。")
+    parser.add_argument("--range", dest="date_range", help="广告同步日期范围，格式 YYYY-MM-DD~YYYY-MM-DD。")
+    parser.add_argument("--store", help="广告同步店铺，支持 all 或逗号分隔店铺 ID。")
+    parser.add_argument("--relogin", action="store_true", help="广告同步时强制重新登录 ERP。")
+    parser.add_argument("--check-only", action="store_true", help="广告同步只抓取检查，不写入 Notion。")
     return parser.parse_args()
 
 
@@ -118,7 +124,43 @@ def print_tasks(json_output: bool = False) -> None:
     print(r"真实执行：python tools\workbench_run.py <任务ID> --execute")
 
 
-def record_run(task: Task, status: str, exit_code: int, started_at, finished_at, message: str) -> None:
+def validate_ads_args(args: argparse.Namespace) -> None:
+    date_pattern = r"20\d{2}-\d{2}-\d{2}"
+    if args.date and not re.fullmatch(date_pattern, args.date):
+        raise SystemExit("--date 格式必须是 YYYY-MM-DD")
+    if args.date_range and not re.fullmatch(fr"{date_pattern}~{date_pattern}", args.date_range):
+        raise SystemExit("--range 格式必须是 YYYY-MM-DD~YYYY-MM-DD")
+    if args.store and not re.fullmatch(r"all|\d+(,\d+)*", args.store):
+        raise SystemExit("--store 只能是 all 或逗号分隔的店铺 ID")
+
+
+def build_task_command(task: Task, args: argparse.Namespace) -> str:
+    if task.id not in {"pdd-ads-sync-all", "pdd-ads-catchup"}:
+        return task.command
+
+    validate_ads_args(args)
+    store = args.store or "all"
+    if task.id == "pdd-ads-catchup":
+        parts = ["python", "catchup_daily.py", "--store", store]
+        if args.date:
+            parts.extend(["--date", args.date])
+        if args.check_only:
+            parts.append("--dry-run")
+        return subprocess.list2cmdline(parts)
+
+    parts = ["python", "main.py", "--store", store]
+    if args.date_range:
+        parts.extend(["--range", args.date_range])
+    elif args.date:
+        parts.extend(["--date", args.date])
+    if args.relogin:
+        parts.append("--relogin")
+    if args.check_only:
+        parts.append("--dry-run")
+    return subprocess.list2cmdline(parts)
+
+
+def record_run(task: Task, command: str, status: str, exit_code: int, started_at, finished_at, message: str) -> None:
     append_record(
         {
             "project": task.project,
@@ -128,14 +170,14 @@ def record_run(task: Task, status: str, exit_code: int, started_at, finished_at,
             "started_at": started_at.isoformat(),
             "finished_at": finished_at.isoformat(),
             "duration_seconds": round((finished_at - started_at).total_seconds(), 3),
-            "command": task.command,
+            "command": command,
             "workdir": task.workdir,
             "message": message,
         }
     )
 
 
-def run_task(task: Task) -> int:
+def run_task(task: Task, command: str) -> int:
     workdir = Path(task.workdir)
     if not workdir.exists():
         print(f"工作目录不存在：{workdir}", file=sys.stderr)
@@ -144,21 +186,21 @@ def run_task(task: Task) -> int:
     started_at = now_local()
     print(f"[运行中] {task.name} | 项目：{task.project} | 开始：{format_time(started_at)}", flush=True)
     print(f"工作目录：{task.workdir}", flush=True)
-    print(f"命令：{task.command}", flush=True)
+    print(f"命令：{command}", flush=True)
 
     if task.detached:
         creationflags = subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        subprocess.Popen(task.command, cwd=workdir, shell=True, creationflags=creationflags)
+        subprocess.Popen(command, cwd=workdir, shell=True, creationflags=creationflags)
         finished_at = now_local()
-        record_run(task, "success", 0, started_at, finished_at, "已启动后台进程")
+        record_run(task, command, "success", 0, started_at, finished_at, "已启动后台进程")
         print(f"[成功] {task.name} 已启动后台进程 | 完成：{format_time(finished_at)}", flush=True)
         return 0
 
-    completed = subprocess.run(task.command, cwd=workdir, shell=True)
+    completed = subprocess.run(command, cwd=workdir, shell=True)
     finished_at = now_local()
     status = "success" if completed.returncode == 0 else "failed"
     message = "运行成功" if completed.returncode == 0 else f"退出码：{completed.returncode}"
-    record_run(task, status, completed.returncode, started_at, finished_at, message)
+    record_run(task, command, status, completed.returncode, started_at, finished_at, message)
     label = "成功" if completed.returncode == 0 else "失败"
     print(f"[{label}] {task.name} | 完成：{format_time(finished_at)} | 退出码：{completed.returncode}", flush=True)
     return completed.returncode
@@ -182,7 +224,8 @@ def main() -> int:
     print(f"任务：{task.name}")
     print(f"说明：{task.description}")
     print(f"工作目录：{task.workdir}")
-    print(f"命令：{task.command}")
+    command = build_task_command(task, args)
+    print(f"命令：{command}")
     print(f"写外部系统：{'是' if task.writes_external_system else '否'}")
     print(f"后台启动：{'是' if task.detached else '否'}")
 
@@ -195,7 +238,7 @@ def main() -> int:
         print("未执行：除 status 外，所有任务都必须显式添加 --execute。")
         return 2
 
-    return run_task(task)
+    return run_task(task, command)
 
 
 if __name__ == "__main__":
