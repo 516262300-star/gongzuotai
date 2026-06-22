@@ -1,50 +1,44 @@
 projects:
-  - id: erp-to-notion-sync
-    name: ERP 数据同步到 Notion
-    status: planning
-    path: projects/erp-to-notion-sync
+  - id: pdd-ads-to-notion
+    name: 拼多多广告数据同步到 Notion
+    status: existing_external
+    path: D:\desktop\codex\guanggao
     owner: lds
     category: sync
-    readme: projects/erp-to-notion-sync/README.md
-    runbook: projects/erp-to-notion-sync/docs/runbook.md
-    external_docs: []
+    readme: D:\desktop\codex\guanggao\README.md
+    runbook: D:\desktop\codex\guanggao\README.md
+    external_docs:
+      - docs/existing-projects-audit.md
 
-  - id: erp-auto-listing
-    name: ERP 自动上架
-    status: planning
-    path: projects/erp-auto-listing
-    owner: lds
-    category: listing
-    readme: projects/erp-auto-listing/README.md
-    runbook: projects/erp-auto-listing/docs/runbook.md
-    external_docs: []
-
-  - id: pdd-weekly-notion-report
-    name: Notion 拼多多周报
-    status: planning
-    path: projects/pdd-weekly-notion-report
+  - id: pdd-weekly-report-existing
+    name: Notion 拼多多周报生成器
+    status: existing_external
+    path: D:\desktop\codex\notion拼多多周报\pdd_weekly_report
     owner: lds
     category: reporting
-    readme: projects/pdd-weekly-notion-report/README.md
-    runbook: projects/pdd-weekly-notion-report/docs/runbook.md
-    external_docs: []
+    readme: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\README.md
+    runbook: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\README.md
+    external_docs:
+      - docs/existing-projects-audit.md
 
-  - id: pdd-auto-listing
-    name: 拼多多自动上架
-    status: planning
-    path: projects/pdd-auto-listing
+  - id: pdd-auto-listing-existing
+    name: 拼多多自动上架工具
+    status: existing_external
+    path: D:\desktop\codex\拼多多自动上架
     owner: lds
     category: listing
-    readme: projects/pdd-auto-listing/README.md
-    runbook: projects/pdd-auto-listing/docs/runbook.md
-    external_docs: []
+    readme: D:\desktop\codex\拼多多自动上架\README.md
+    runbook: D:\desktop\codex\拼多多自动上架\README.md
+    external_docs:
+      - docs/existing-projects-audit.md
 
-  - id: ads-to-notion
-    name: 广告数据自动读取到 Notion
-    status: planning
-    path: projects/ads-to-notion
+  - id: erp-miniapp-auto-upload
+    name: 小程序 ERP 自动上架商品工具
+    status: existing_external
+    path: D:\desktop\codex\小程序自动上架\erp_auto_upload
     owner: lds
-    category: sync
-    readme: projects/ads-to-notion/README.md
-    runbook: projects/ads-to-notion/docs/runbook.md
-    external_docs: []
+    category: listing
+    readme: D:\desktop\codex\小程序自动上架\erp_auto_upload\README.md
+    runbook: D:\desktop\codex\小程序自动上架\erp_auto_upload\README.md
+    external_docs:
+      - docs/existing-projects-audit.md

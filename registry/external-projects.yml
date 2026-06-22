@@ -1,0 +1,64 @@
+external_projects:
+  - id: pdd-ads-to-notion
+    name: 拼多多广告数据同步到 Notion
+    source_path: D:\desktop\codex\guanggao
+    readme: D:\desktop\codex\guanggao\README.md
+    category: sync
+    data_flow: ERP 广告数据 -> Notion 7 店每日广告数据库
+    primary_commands:
+      - python main.py --store all
+      - python catchup_daily.py --store all
+    desktop_entry: D:\desktop\codex\guanggao\启动拼多多广告同步.bat
+    schedule: Windows 任务计划：每天 9 点运行 run_daily.ps1
+    log_path: D:\desktop\codex\guanggao\debug
+    secrets:
+      - D:\desktop\codex\guanggao\.env
+      - D:\desktop\codex\guanggao\.auth\session.json
+
+  - id: pdd-weekly-report-existing
+    name: Notion 拼多多周报生成器
+    source_path: D:\desktop\codex\notion拼多多周报\pdd_weekly_report
+    readme: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\README.md
+    category: reporting
+    data_flow: Notion 7 店每日广告数据库 -> Notion 拼多多周报页面
+    primary_commands:
+      - python test_connection.py
+      - python main.py
+    desktop_entry: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\启动拼多多周报生成器.vbs
+    schedule: 建议每周一 10:00 运行 main.py
+    log_path: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs
+    secrets:
+      - D:\desktop\codex\notion拼多多周报\pdd_weekly_report\.env
+
+  - id: pdd-auto-listing-existing
+    name: 拼多多自动上架工具
+    source_path: D:\desktop\codex\拼多多自动上架
+    readme: D:\desktop\codex\拼多多自动上架\README.md
+    category: listing
+    data_flow: ERP 优质价 + 图片空间素材 -> 拼多多后台上架草稿
+    primary_commands:
+      - .\start_pdd_publisher.ps1
+      - python desktop_tool.py
+    desktop_entry: D:\desktop\codex\拼多多自动上架\start_pdd_publisher.bat
+    local_url: http://127.0.0.1:8765/
+    log_path: D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json
+    secrets:
+      - D:\desktop\codex\拼多多自动上架\.env
+      - D:\desktop\codex\拼多多自动上架\config.yaml
+      - D:\desktop\codex\拼多多自动上架\states
+
+  - id: erp-miniapp-auto-upload
+    name: 小程序 ERP 自动上架商品工具
+    source_path: D:\desktop\codex\小程序自动上架\erp_auto_upload
+    readme: D:\desktop\codex\小程序自动上架\erp_auto_upload\README.md
+    category: listing
+    data_flow: 本地素材目录 -> ERP 自研后台新建商品
+    primary_commands:
+      - python main.py parse --material-root "素材目录"
+      - python main.py upload-test --material-root "素材目录"
+      - python main.py upload --material-root "素材目录"
+    desktop_entry: D:\desktop\codex\小程序自动上架\erp_auto_upload\启动桌面软件.bat
+    log_path: D:\desktop\codex\小程序自动上架\erp_auto_upload\logs
+    secrets:
+      - D:\desktop\codex\小程序自动上架\erp_auto_upload\.env
+

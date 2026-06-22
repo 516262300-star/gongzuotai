@@ -1,81 +1,36 @@
 # ERP 到 Notion 再到拼多多周报的数据流
 
-正确链路如下：
+根据现有项目读取结果，广告数据和周报的正确链路如下：
 
 ```text
-ERP 明细数据
-  -> ERP 数据同步脚本
-  -> Notion 明细数据库
-  -> 拼多多周报汇总脚本
-  -> Notion 拼多多周报数据库/页面
+ERP 广告数据
+  -> D:\desktop\codex\guanggao
+  -> Notion 7 个店铺每日广告数据库
+  -> D:\desktop\codex\notion拼多多周报\pdd_weekly_report
+  -> Notion 拼多多周报页面和 7 个店铺内嵌数据库
 ```
 
-## 第一层：ERP 明细数据
+## 第一层：ERP 到 Notion 广告数据库
 
-ERP 是源头。后续周报不应该依赖人工从拼多多后台导出文件。
+现有项目 `D:\desktop\codex\guanggao` 已实现：
 
-第一批建议同步这些明细：
+- 从 ERP 抓取一到七店广告数据。
+- 写入对应 Notion 数据库。
+- 判重规则：`日期 + plan_id + 店铺`。
+- 每天 9 点通过 Windows 任务计划补漏同步。
 
-- 订单明细
-- 商品明细
-- SKU
-- 店铺
-- 成交金额
-- 订单数量
-- 退款金额
-- 库存，后续用于自动上架和补货判断
+## 第二层：Notion 周报生成
 
-## 第二层：Notion 明细数据库
+现有项目 `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` 已实现：
 
-Notion 先做中间数据层，保存从 ERP 同步过来的可复核数据。
+- 读取 `SHOP_1_DB_ID` 到 `SHOP_7_DB_ID`。
+- 按上周一到上周日过滤。
+- 全店托管单独汇总。
+- 稳定成本按商品 ID 聚合。
+- 在 Notion 周报页面下创建 7 个店铺内嵌数据库。
 
-建议至少有一个数据库：
+## 工作台内 CSV 模拟器的处理
 
-```text
-PDD ERP Sales Detail
-```
+早期创建过一个工作台内 CSV 周报模拟器，但它不是现有真实链路，已经从工作台删除。
 
-建议唯一键：
-
-```text
-date + shop_name + sku + order_id
-```
-
-如果 ERP 只能提供按天聚合数据，则唯一键改为：
-
-```text
-date + shop_name + sku
-```
-
-## 第三层：Notion 拼多多周报
-
-周报脚本从 Notion 明细数据库读取数据，按周期汇总，然后写入周报数据库或页面。
-
-周报唯一键：
-
-```text
-week + shop_name
-```
-
-重复运行时：
-
-- 已有该周报则更新。
-- 没有该周报则创建。
-- 每次运行都写入 `logs/script-runs.jsonl`。
-
-## 当前 CSV 脚本的定位
-
-`projects/pdd-weekly-notion-report/automation/build_weekly_report.py` 当前读取 CSV，是本地模拟器，不是最终数据链路。
-
-它的作用是：
-
-- 先验证周报指标怎么算。
-- 先验证 Markdown 周报长什么样。
-- 先验证运行状态记录是否正常。
-
-最终要改为：
-
-```text
-读取 Notion 明细数据库 -> 汇总 -> 写入 Notion 周报
-```
-
+后续优先接入现有 `notion拼多多周报` 项目，而不是继续扩展 CSV 模拟器。

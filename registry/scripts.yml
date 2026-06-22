@@ -1,10 +1,45 @@
 scripts:
-  - id: pdd-weekly-report-dry-run
-    project: pdd-weekly-notion-report
-    name: Notion 拼多多周报 dry-run
-    script: projects/pdd-weekly-notion-report/automation/build_weekly_report.py
-    command: python automation/build_weekly_report.py --input data/samples/pdd_weekly_sample.csv --week 2026-W26 --dry-run
-    workdir: projects/pdd-weekly-notion-report
-    status_command: python ../../tools/workbench_status.py --script build_weekly_report.py
+  - id: pdd-ads-sync-all
+    project: pdd-ads-to-notion
+    name: 拼多多广告同步一到七店
+    script: D:\desktop\codex\guanggao\main.py
+    command: python main.py --store all
+    workdir: D:\desktop\codex\guanggao
+    status_command: 查看 D:\desktop\codex\guanggao\debug
+    writes_external_system: true
+
+  - id: pdd-ads-catchup
+    project: pdd-ads-to-notion
+    name: 拼多多广告补漏检查
+    script: D:\desktop\codex\guanggao\catchup_daily.py
+    command: python catchup_daily.py --store all
+    workdir: D:\desktop\codex\guanggao
+    status_command: 查看 D:\desktop\codex\guanggao\debug
+    writes_external_system: true
+
+  - id: pdd-weekly-report-existing
+    project: pdd-weekly-report-existing
+    name: Notion 拼多多周报生成
+    script: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\main.py
+    command: python main.py
+    workdir: D:\desktop\codex\notion拼多多周报\pdd_weekly_report
+    status_command: 查看 D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs
+    writes_external_system: true
+
+  - id: pdd-publisher-desktop
+    project: pdd-auto-listing-existing
+    name: 拼多多自动上架工作台
+    script: D:\desktop\codex\拼多多自动上架\desktop_tool.py
+    command: python desktop_tool.py
+    workdir: D:\desktop\codex\拼多多自动上架
+    status_command: 查看 D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json
     writes_external_system: false
 
+  - id: erp-miniapp-upload-desktop
+    project: erp-miniapp-auto-upload
+    name: 小程序 ERP 自动上架桌面软件
+    script: D:\desktop\codex\小程序自动上架\erp_auto_upload\main.py
+    command: python main.py upload-test --material-root "素材目录"
+    workdir: D:\desktop\codex\小程序自动上架\erp_auto_upload
+    status_command: 查看 D:\desktop\codex\小程序自动上架\erp_auto_upload\logs
+    writes_external_system: false

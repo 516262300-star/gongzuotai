@@ -1,16 +1,15 @@
 # 个人工作台
 
-这个目录用来集中管理所有自动化、数据同步、报表、上架和后续项目。目标是让每个项目都有独立边界、统一入口、统一凭据约定、统一运行说明，后续新增项目时直接复制模板即可。
+这个目录用来集中管理所有自动化、数据同步、报表、上架和后续项目。工作台先读取并登记现有项目，再决定是否迁移、封装或新增脚本，避免凭空假设数据源。
 
 ## 当前项目
 
 | 项目 | 目录 | 状态 | 说明 |
 | --- | --- | --- | --- |
-| ERP 数据同步到 Notion | `projects/erp-to-notion-sync/` | 规划中 | 从 ERP 读取订单、商品、库存、销售等明细，写入 Notion 明细数据库，作为周报和后续自动化的数据底座。 |
-| ERP 自动上架 | `projects/erp-auto-listing/` | 规划中 | 从 ERP 或商品资料源读取商品信息，生成或执行平台上架流程。 |
-| Notion 拼多多周报 | `projects/pdd-weekly-notion-report/` | MVP dry-run 已创建 | 从 Notion 明细数据库汇总拼多多经营数据，生成周报并写回 Notion。当前 CSV 只作为本地模拟输入。 |
-| 拼多多自动上架 | `projects/pdd-auto-listing/` | 规划中 | 针对拼多多平台的商品发布、更新、校验和失败重试。 |
-| 广告数据自动读取到 Notion | `projects/ads-to-notion/` | 规划中 | 定期读取广告平台数据，清洗后同步到 Notion 数据库。 |
+| 拼多多广告数据同步到 Notion | `D:\desktop\codex\guanggao` | 已存在 | 从 ERP 抓取拼多多一到七店广告数据，写入 Notion 每日广告数据库。 |
+| Notion 拼多多周报生成器 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` | 已存在 | 从 Notion 7 个店铺广告数据库读取上周数据，生成 Notion 周报页面。 |
+| 拼多多自动上架工具 | `D:\desktop\codex\拼多多自动上架` | 已存在 | 使用 ERP 优质价和图片空间素材生成拼多多上架包，并辅助后台保存草稿。 |
+| 小程序 ERP 自动上架商品工具 | `D:\desktop\codex\小程序自动上架\erp_auto_upload` | 已存在 | 使用本地素材目录在公司自研 ERP 后台新建商品，默认停在保存前。 |
 
 ## 目录说明
 
@@ -18,8 +17,15 @@
 .
 ├── docs/                 # 工作台规范、自动化标准、项目模板
 ├── registry/             # 项目登记表和后续可机器读取的配置
-├── projects/             # 每个项目一个独立目录
+├── projects/             # 预留给后续迁入工作台的项目
 └── AGENTS.md             # Codex/协作规则
+```
+
+已读取的四个现有项目登记见：
+
+```text
+registry/external-projects.yml
+docs/existing-projects-audit.md
 ```
 
 每个项目目录建议保持一致：
@@ -43,7 +49,7 @@ project-name/
 
 ## 下一步
 
-优先推进 `projects/erp-to-notion-sync/`，先把 ERP 明细同步到 Notion，再让 `projects/pdd-weekly-notion-report/` 从 Notion 汇总周报。当前周报 dry-run 脚本只作为本地模拟器。执行清单见 `docs/next-actions.md`。
+优先把现有四个项目接入工作台状态面板和统一启动入口。广告同步与周报的真实链路是：`ERP 广告数据 -> Notion 7 店每日广告数据库 -> Notion 拼多多周报`。执行清单见 `docs/next-actions.md`。
 
 ## 脚本运行状态
 
@@ -66,16 +72,16 @@ logs/script-runs.jsonl
 python tools/workbench_status.py
 ```
 
-查看某个脚本状态：
+查看某个已接入工作台运行记录的脚本状态：
 
 ```powershell
-python tools/workbench_status.py --script build_weekly_report.py
+python tools/workbench_status.py --script script_name.py
 ```
 
-已登记脚本见 `registry/scripts.yml`。
+已登记现有脚本见 `registry/scripts.yml`。
 
 ## 凭据约定
 
 - 不提交真实账号、密码、cookie、token、API key。
-- 每个项目只保留 `config/.env.example`。
+- 外部项目只登记 `.env.example` 或配置模板，不读取、不提交真实 `.env`。
 - 通用凭据命名参考 `docs/automation-standards.md`。
