@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
@@ -461,6 +462,10 @@ INDEX_HTML = r"""<!doctype html>
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[c]));
     const writeOutput = (text) => { output.textContent = text || ""; };
+    const appendOutput = (text) => {
+      output.textContent += text;
+      output.scrollTop = output.scrollHeight;
+    };
     const statusOrder = ["成功", "失败", "警告", "未运行"];
     let runningTask = null;
     let runningTimer = null;
@@ -578,10 +583,12 @@ INDEX_HTML = r"""<!doctype html>
       runningStartedAt = Date.now();
       setButtonsDisabled(true);
       setRunState(`${mode === "execute" ? "执行中" : "预览中"}：${task} | 0 秒`, true);
-      writeOutput([
+      writeOutput("");
+      appendOutput([
         `正在${mode === "execute" ? "执行" : "预览"}：${task}`,
         "",
-        "任务运行中，请不要重复点击执行。长任务完成后会在这里显示完整输出。"
+        "任务运行中，请不要重复点击执行。下面会实时滚动显示脚本输出。",
+        ""
       ].join("\n"));
       runningTimer = window.setInterval(() => {
         const seconds = Math.floor((Date.now() - runningStartedAt) / 1000);
@@ -607,19 +614,36 @@ INDEX_HTML = r"""<!doctype html>
         return;
       }
       startRunTimer(task, mode);
+      let success = false;
       try {
         const payload = { task, mode, confirm: confirmText.value };
-        const data = await fetchJSON("/api/run", {
+        const response = await fetch("/api/run", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        writeOutput(data.output || JSON.stringify(data, null, 2));
-        stopRunTimer(data.ok !== false);
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || response.statusText);
+        }
+        if (!response.body) {
+          throw new Error("浏览器不支持流式输出。");
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          appendOutput(decoder.decode(value, { stream: true }));
+        }
+        appendOutput(decoder.decode());
+        const exitMatch = output.textContent.match(/\[工作台\] 任务结束，退出码：(\d+)/);
+        success = exitMatch ? exitMatch[1] === "0" : true;
+        stopRunTimer(success);
         await loadStatus();
         await loadHistory();
       } catch (error) {
-        writeOutput(error.message);
+        appendOutput(`\n${error.message}\n`);
         stopRunTimer(false);
       }
     }
@@ -727,18 +751,46 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         else:
             command.append("--execute")
 
-        completed = subprocess.run(
-            command,
-            cwd=WORKBENCH_ROOT,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            capture_output=True,
-        )
-        output = completed.stdout
-        if completed.stderr:
-            output = output + ("\n" if output else "") + completed.stderr
-        self.send_json({"ok": completed.returncode == 0, "exit_code": completed.returncode, "output": output})
+        self.stream_command(command)
+
+    def stream_command(self, command: list[str]) -> None:
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
+        env["PYTHONIOENCODING"] = "utf-8"
+        command = [command[0], "-u", *command[1:]]
+        try:
+            process = subprocess.Popen(
+                command,
+                cwd=WORKBENCH_ROOT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,
+                env=env,
+            )
+        except OSError as exc:
+            self.write_stream(f"[工作台] 启动失败：{exc}\n")
+            return
+
+        assert process.stdout is not None
+        try:
+            for line in process.stdout:
+                self.write_stream(line)
+            exit_code = process.wait()
+            self.write_stream(f"\n[工作台] 任务结束，退出码：{exit_code}\n")
+        except (BrokenPipeError, ConnectionResetError):
+            process.terminate()
+
+    def write_stream(self, text: str) -> None:
+        self.wfile.write(text.encode("utf-8", errors="replace"))
+        self.wfile.flush()
 
 
 def read_workbench_runs(limit: int = 20) -> list[dict[str, object]]:
