@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-已有第一版 dry-run 脚本，不会写入 Notion。
+已有第一版 CSV dry-run 脚本，不会写入 Notion。CSV 只是本地模拟输入，最终应改为读取 Notion 明细数据库。
 
 ## 运行命令
 
@@ -39,7 +39,7 @@ python ..\..\tools\workbench_status.py --script build_weekly_report.py
 
 ## 输入文件格式
 
-CSV 必须包含以下列：
+当前 CSV 模拟输入必须包含以下列：
 
 ```text
 date,shop_name,product_name,sku,visitors,orders,revenue,refund_amount,ad_spend

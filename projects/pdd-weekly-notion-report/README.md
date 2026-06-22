@@ -2,7 +2,7 @@
 
 ## 项目目标
 
-汇总拼多多经营数据，生成周报内容，并写入指定 Notion 页面或数据库。
+从 Notion 明细数据库汇总拼多多经营数据，生成周报内容，并写入指定 Notion 页面或数据库。Notion 明细数据由 `projects/erp-to-notion-sync/` 从 ERP 同步而来。
 
 ## 当前状态
 
@@ -13,7 +13,7 @@
 ## 数据流
 
 ```text
-拼多多数据源 -> 指标清洗 -> 周报生成 -> Notion 写入 -> 复核
+ERP -> Notion 明细数据库 -> 指标汇总 -> Notion 拼多多周报 -> 复核
 ```
 
 ## 运行方式
@@ -30,7 +30,7 @@ python automation/build_weekly_report.py --input data/samples/pdd_weekly_sample.
 data/output/pdd_weekly_2026-W26.md
 ```
 
-当前脚本只支持 dry-run，不会写入 Notion。
+当前脚本只支持 CSV dry-run，不会写入 Notion。CSV 是本地模拟输入，用来模拟 Notion 明细库已有数据时的周报汇总结果。
 
 运行时会自动显示状态，并写入工作台运行记录：
 
@@ -57,4 +57,4 @@ python ..\..\tools\workbench_status.py --script build_weekly_report.py
 
 ## 下一步
 
-用真实拼多多导出的 CSV 替换 `data/samples/pdd_weekly_sample.csv` 的样例字段，确认列名后再接入 Notion 写入。
+下一步先完成 `projects/erp-to-notion-sync/`，把 ERP 明细写入 Notion。之后把本脚本从读取 CSV 改为读取 Notion 明细数据库，再写入 Notion 周报。

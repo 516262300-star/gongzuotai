@@ -4,9 +4,11 @@
 
 第一版只处理一个店铺、一个周期的数据，已生成本地 Markdown 周报，不自动写入 Notion。
 
+注意：CSV 只是本地模拟输入，最终数据源应为 Notion 明细数据库。Notion 明细数据库由 `projects/erp-to-notion-sync/` 从 ERP 同步生成。
+
 ## 输入
 
-优先支持 CSV，后续再支持 Excel 或 API。
+当前支持 CSV 只是为了模拟 Notion 明细数据。最终输入应改为 Notion 明细数据库查询结果。
 
 建议字段：
 
@@ -61,9 +63,15 @@ automation/build_weekly_report.py
 data/samples/pdd_weekly_sample.csv
 ```
 
+## 最终链路
+
+```text
+ERP -> Notion 明细数据库 -> 拼多多周报汇总 -> Notion 周报数据库/页面
+```
+
 ## 待确认
 
-- 实际导出的拼多多数据列名。
+- ERP 明细同步到 Notion 后的真实字段名。
 - Notion 是页面写入还是数据库写入。
 - 是否需要多店铺。
 - 是否需要和广告数据合并。

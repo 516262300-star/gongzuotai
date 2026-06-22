@@ -1,4 +1,14 @@
 projects:
+  - id: erp-to-notion-sync
+    name: ERP 数据同步到 Notion
+    status: planning
+    path: projects/erp-to-notion-sync
+    owner: lds
+    category: sync
+    readme: projects/erp-to-notion-sync/README.md
+    runbook: projects/erp-to-notion-sync/docs/runbook.md
+    external_docs: []
+
   - id: erp-auto-listing
     name: ERP 自动上架
     status: planning
@@ -38,4 +48,3 @@ projects:
     readme: projects/ads-to-notion/README.md
     runbook: projects/ads-to-notion/docs/runbook.md
     external_docs: []
-

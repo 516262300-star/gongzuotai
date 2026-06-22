@@ -26,7 +26,7 @@
 
 ## 需要你确认
 
-- 拼多多后台导出文件的真实列名，当前脚本使用 `date,shop_name,product_name,sku,visitors,orders,revenue,refund_amount,ad_spend`。
+- Notion 明细数据库的真实字段名，当前 CSV 模拟脚本使用 `date,shop_name,product_name,sku,visitors,orders,revenue,refund_amount,ad_spend`。
 - 销售额是否使用付款金额、成交金额还是结算金额。
 - 是否需要扣退款后销售额。
 - 周报周期使用自然周还是自定义周期。
