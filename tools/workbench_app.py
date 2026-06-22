@@ -6,9 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -29,6 +30,7 @@ class HistoryEntry:
     title: str
     summary: str
     source: str
+    details: list[str] = field(default_factory=list)
 
 
 INDEX_HTML = r"""<!doctype html>
@@ -257,6 +259,21 @@ INDEX_HTML = r"""<!doctype html>
     .path {
       font-family: Consolas, "Cascadia Mono", monospace;
       font-size: 12px;
+    }
+    .history-details {
+      display: grid;
+      gap: 4px;
+      margin: 2px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .history-details li {
+      color: var(--muted);
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .history-details li::before {
+      content: "- ";
     }
     .badge {
       display: inline-flex;
@@ -538,6 +555,7 @@ INDEX_HTML = r"""<!doctype html>
             </div>
             <div class="summary">${escapeHTML(item.summary)}</div>
             <div class="meta">${escapeHTML(item.time)}</div>
+            ${item.details?.length ? `<ul class="history-details">${item.details.map(detail => `<li>${escapeHTML(detail)}</li>`).join("")}</ul>` : ""}
             <div class="path">${escapeHTML(item.source)}</div>
           </div>
         `).join("");
@@ -878,6 +896,9 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
             )
         return entries
 
+    if agent == "erp_miniapp":
+        return collect_erp_miniapp_history(limit)
+
     if agent not in PROJECTS:
         return []
 
@@ -906,6 +927,210 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
             )
         )
     return entries
+
+
+def collect_erp_miniapp_history(limit: int = 20) -> list[HistoryEntry]:
+    config = PROJECTS["erp_miniapp"]
+    log_dir = config.get("log_dir")
+    if not isinstance(log_dir, Path) or not log_dir.exists():
+        return []
+
+    files = sorted(
+        [path for path in log_dir.glob("*.log") if path.is_file()],
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )[:limit]
+
+    entries: list[HistoryEntry] = []
+    for path in files:
+        text = read_text_tail(path, 1200)
+        sessions = split_erp_log_sessions(text) if path.name.startswith("run_") else [(path_mtime(path), text)]
+        for session_time, session_text in sessions:
+            status = classify_history_status("erp_miniapp", session_text)
+            summary, details = summarize_erp_miniapp_log(path, session_text, session_time)
+            entries.append(
+                HistoryEntry(
+                    time=session_time or path_mtime(path),
+                    status=status,
+                    title=erp_miniapp_history_title(path, session_text),
+                    summary=summary,
+                    source=str(path),
+                    details=details,
+                )
+            )
+    return sorted(entries, key=lambda item: item.time, reverse=True)[:limit]
+
+
+def split_erp_log_sessions(text: str) -> list[tuple[str, str]]:
+    from datetime import datetime
+
+    sessions: list[list[str]] = []
+    current: list[str] = []
+    last_time: datetime | None = None
+    current_time = ""
+
+    for line in text.splitlines():
+        timestamp = parse_log_timestamp(line)
+        if timestamp:
+            parsed = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+            if current and last_time and (parsed - last_time).total_seconds() > 10 * 60:
+                sessions.append(current)
+                current = []
+            last_time = parsed
+            current_time = timestamp
+        current.append(line)
+
+    if current:
+        sessions.append(current)
+
+    result: list[tuple[str, str]] = []
+    for session in sessions:
+        timestamps = [parse_log_timestamp(line) for line in session]
+        timestamps = [item for item in timestamps if item]
+        result.append((timestamps[-1] if timestamps else current_time, "\n".join(session)))
+    return result
+
+
+def parse_log_timestamp(line: str) -> str:
+    match = re.match(r"^(20\d{2}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", line)
+    return match.group(1) if match else ""
+
+
+def erp_miniapp_history_title(path: Path, text: str) -> str:
+    if "cmd_upload_test" in text or path.name.startswith("upload_"):
+        return f"上传测试 / {path.name}"
+    if "cmd_form_test" in text or path.name.startswith("form_"):
+        return f"表单测试 / {path.name}"
+    if "cmd_upload" in text or "流程完成" in text:
+        return f"完整上架流程 / {path.name}"
+    if "cmd_price_query" in text:
+        return f"查价 / {path.name}"
+    if "cmd_parse" in text:
+        return f"素材解析 / {path.name}"
+    return path.name
+
+
+def summarize_erp_miniapp_log(path: Path, text: str, session_time: str = "") -> tuple[str, list[str]]:
+    details: list[str] = []
+
+    title = last_regex_group(text, r"填写链接标题：(.+)")
+    if title:
+        details.append(f"商品标题：{title}")
+
+    material_root = infer_erp_material_root(text, title)
+    if material_root:
+        details.append(f"素材目录：{material_root}")
+
+    sku_count = last_regex_group(text, r"填写 SKU 行\s+(\d+)")
+    if sku_count:
+        details.append(f"SKU 行数：{sku_count}")
+
+    upload_parts = []
+    gallery_count = last_regex_group(text, r"开始上传主图：(\d+)\s*个")
+    original_count = last_regex_group(text, r"开始上传主图原图：(\d+)\s*个")
+    detail_count = last_regex_group(text, r"详情页内容图片上传完成：(\d+)\s*张")
+    size_count = last_regex_group(text, r"尺寸图上传完成：(\d+)\s*张")
+    video_count = last_regex_group(text, r"开始上传视频：(\d+)\s*个")
+    if gallery_count:
+        upload_parts.append(f"主图 {gallery_count}")
+    if original_count:
+        upload_parts.append(f"原图 {original_count}")
+    if detail_count:
+        upload_parts.append(f"详情图 {detail_count}")
+    if size_count:
+        upload_parts.append(f"尺寸图 {size_count}")
+    if video_count:
+        upload_parts.append(f"视频 {video_count}")
+    if upload_parts:
+        details.append("上传统计：" + " / ".join(upload_parts))
+
+    warning_lines = [line.strip() for line in text.splitlines() if " WARNING " in line or "警告" in line]
+    if warning_lines:
+        details.append(f"Warning 数量：{len(warning_lines)}")
+        details.extend(f"Warning：{line[:220]}" for line in warning_lines[-2:])
+
+    screenshot = latest_erp_screenshot(path, session_time)
+    if screenshot:
+        details.append(f"最近截图：{screenshot}")
+
+    result = erp_result_summary(text)
+    if not result:
+        result = summarize_log("erp_miniapp", text)
+    return result, details[:8]
+
+
+def erp_result_summary(text: str) -> str:
+    if "流程完成" in text:
+        if "已完成上架信息填写，默认停在保存前" in text:
+            return "完整流程完成，已填写上架信息，默认停在保存前。"
+        return "完整流程完成。"
+    if "上传测试已完成" in text:
+        return "上传测试完成，未保存商品。"
+    if "表单测试完成" in text:
+        return "表单测试完成，未上传、未保存。"
+    if "ERP 登录完成" in text:
+        return "ERP 登录完成，后续步骤见日志。"
+    if "视频缺失或未匹配关键字" in text:
+        return "素材解析出现 warning：视频缺失或未匹配关键字。"
+    if "未找到 ffprobe" in text:
+        return "素材解析出现 warning：未找到 ffprobe，跳过视频分辨率读取。"
+    return ""
+
+
+def infer_erp_material_root(text: str, title: str = "") -> str:
+    candidates: list[str] = []
+    for pattern in (
+        r"视频缺失或未匹配关键字：(.+?)\\视频",
+        r"未找到 ffprobe，跳过视频分辨率读取：(.+?)\\视频",
+    ):
+        for match in re.findall(pattern, text):
+            candidates.append(str(match).strip())
+    if not candidates:
+        return ""
+    if title:
+        title_matches = [item for item in candidates if title.lower() in item.lower()]
+        if title_matches:
+            return title_matches[-1]
+    non_temp = [item for item in candidates if "AppData\\Local\\Temp" not in item]
+    if non_temp:
+        unique = list(dict.fromkeys(non_temp))
+        return "；".join(unique[-3:])
+    return candidates[-1]
+
+
+def last_regex_group(text: str, pattern: str) -> str:
+    matches = re.findall(pattern, text)
+    if not matches:
+        return ""
+    value = matches[-1]
+    if isinstance(value, tuple):
+        value = value[0]
+    return str(value).strip()
+
+
+def latest_erp_screenshot(log_path: Path, session_time: str = "") -> str:
+    from datetime import datetime
+
+    screenshot_dir = log_path.parent / "screenshots"
+    if not screenshot_dir.exists():
+        return ""
+    if session_time:
+        session_ts = datetime.strptime(session_time, "%Y-%m-%d %H:%M:%S").timestamp()
+        lower_bound = session_ts - 20 * 60
+        upper_bound = session_ts + 10 * 60
+    else:
+        lower_bound = log_path.stat().st_mtime - 4 * 60 * 60
+        upper_bound = log_path.stat().st_mtime + 10 * 60
+    screenshots = [
+        path
+        for path in screenshot_dir.glob("*.png")
+        if lower_bound <= path.stat().st_mtime <= upper_bound
+    ]
+    if not screenshots and not session_time:
+        screenshots = list(screenshot_dir.glob("*.png"))
+    if not screenshots:
+        return ""
+    return str(max(screenshots, key=lambda item: item.stat().st_mtime))
 
 
 def classify_history_status(agent: str, text: str) -> str:

@@ -305,3 +305,10 @@ http://127.0.0.1:8787/
 | 拼多多周报 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs` |
 | 拼多多自动上架 | `D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json` |
 | 小程序 ERP 自动上架 | `D:\desktop\codex\小程序自动上架\erp_auto_upload\logs` |
+
+小程序 ERP 自动上架历史会额外解析日志内容，尽量展示：
+
+- 运行类型：完整上架流程、上传测试、表单测试、查价或素材解析。
+- 商品标题和素材目录。
+- SKU 行数、主图/原图/详情图/尺寸图/视频上传统计。
+- 最近 warning 和最近截图路径。
