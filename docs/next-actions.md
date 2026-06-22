@@ -37,8 +37,10 @@
 
 产出：
 
-- 一个工作台命令，例如 `python tools/workbench_external_status.py`
-- 显示每个项目最近一次成功/失败/运行时间/日志文件
+- 工作台命令：`python tools/workbench_external_status.py`
+- 显示每个项目最近一次成功/失败/警告/未运行、运行时间、日志文件和建议
+
+当前已完成只读状态面板。它不会执行任何同步或上架，只读取日志和草稿历史。
 
 ## 第 3 步：统一启动入口
 

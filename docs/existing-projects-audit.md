@@ -247,3 +247,14 @@ ERP 小程序上架链路：
 本地素材目录 -> 小程序自动上架 -> ERP 自研后台新建商品
 ```
 
+## 工作台状态查看
+
+当前已提供只读状态面板：
+
+```powershell
+cd D:\desktop\codex\工作台
+python tools\workbench_external_status.py
+```
+
+这个命令只读取四个项目的日志和历史文件，不执行同步、不写 Notion、不打开浏览器、不保存商品。
+

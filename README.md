@@ -72,6 +72,12 @@ logs/script-runs.jsonl
 python tools/workbench_status.py
 ```
 
+查看四个现有外部项目状态：
+
+```powershell
+python tools/workbench_external_status.py
+```
+
 查看某个已接入工作台运行记录的脚本状态：
 
 ```powershell

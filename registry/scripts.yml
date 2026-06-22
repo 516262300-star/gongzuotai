@@ -1,4 +1,13 @@
 scripts:
+  - id: workbench-external-status
+    project: workbench
+    name: 工作台外部项目状态面板
+    script: tools\workbench_external_status.py
+    command: python tools\workbench_external_status.py
+    workdir: D:\desktop\codex\工作台
+    status_command: python tools\workbench_external_status.py
+    writes_external_system: false
+
   - id: pdd-ads-sync-all
     project: pdd-ads-to-notion
     name: 拼多多广告同步一到七店
