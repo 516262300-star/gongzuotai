@@ -38,73 +38,114 @@ INDEX_HTML = r"""<!doctype html>
   <title>个人工作台</title>
   <style>
     :root {
-      --bg: #eef1f5;
-      --panel: #ffffff;
-      --panel-soft: #f8fafc;
-      --line: #d7dde8;
-      --line-strong: #bdc7d6;
-      --text: #172033;
-      --muted: #667085;
+      --app-bg: #f3f5f8;
+      --nav-bg: #202936;
+      --nav-muted: #a8b3c2;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --line: #dbe1ea;
+      --line-strong: #c7d0de;
+      --text: #161f2e;
+      --muted: #687386;
       --good: #087443;
       --bad: #b42318;
-      --warn: #9a5b13;
-      --idle: #596579;
-      --focus: #1f5eff;
-      --focus-soft: #edf3ff;
+      --warn: #95610f;
+      --idle: #566273;
+      --accent: #2563eb;
+      --accent-weak: #eef4ff;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
+      background: var(--app-bg);
       color: var(--text);
       font-size: 14px;
       letter-spacing: 0;
     }
-    header {
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel);
+    .app-shell {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    aside {
       position: sticky;
       top: 0;
-      z-index: 2;
+      height: 100vh;
+      padding: 18px 14px;
+      background: var(--nav-bg);
+      color: #fff;
+    }
+    .brand {
+      display: grid;
+      gap: 5px;
+      padding: 6px 8px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
     }
     h1 { margin: 0; font-size: 18px; font-weight: 700; }
-    .title-block { display: grid; gap: 2px; }
-    .title-sub { color: var(--muted); font-size: 12px; }
-    main {
-      display: grid;
-      grid-template-columns: minmax(330px, .9fr) minmax(380px, 1fr) minmax(390px, 1.05fr);
-      gap: 16px;
-      padding: 16px;
-      max-width: 1680px;
-      margin: 0 auto;
-    }
-    section {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      min-width: 0;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
-    }
-    .section-head {
+    .brand-sub { color: var(--nav-muted); font-size: 12px; line-height: 1.5; }
+    nav { display: grid; gap: 6px; padding: 16px 0; }
+    nav a {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
+      gap: 9px;
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: 6px;
+      color: #e8edf5;
+      text-decoration: none;
+      font-weight: 600;
     }
-    h2 { margin: 0; font-size: 15px; font-weight: 650; }
+    nav a:hover { background: rgba(255,255,255,.1); }
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8fb4ff;
+      flex: 0 0 auto;
+    }
+    .nav-note {
+      margin: 10px 8px 0;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      color: var(--nav-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .content {
+      min-width: 0;
+      padding: 18px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .page-title {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    .page-title h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 750;
+    }
+    .page-title p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .toolbar { display: flex; align-items: center; gap: 8px; }
     button, select, input {
       font: inherit;
       min-height: 34px;
       border-radius: 6px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--line-strong);
       background: #fff;
       color: var(--text);
     }
@@ -113,144 +154,267 @@ INDEX_HTML = r"""<!doctype html>
       cursor: pointer;
       white-space: nowrap;
     }
-    button.primary { background: var(--focus); border-color: var(--focus); color: #fff; }
-    button.danger { background: #fff7f5; border-color: #f2b8b5; color: var(--bad); }
+    button:hover { border-color: #9aa8ba; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.danger { background: #fff7f5; border-color: #efaaa5; color: var(--bad); }
     button:disabled { opacity: .55; cursor: not-allowed; }
-    select { padding: 0 10px; min-width: 180px; }
+    select { padding: 0 10px; min-width: 210px; }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .kpi {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 78px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+    .kpi strong { font-size: 26px; line-height: 1; }
+    .kpi span { color: var(--muted); font-size: 12px; }
+    .kpi-mark {
+      width: 10px;
+      height: 38px;
+      border-radius: 999px;
+      background: var(--idle);
+    }
+    .kpi-mark.success { background: var(--good); }
+    .kpi-mark.failed { background: var(--bad); }
+    .kpi-mark.warning { background: var(--warn); }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(430px, 1.1fr) minmax(380px, .9fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .span-all { grid-column: 1 / -1; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-width: 0;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+      overflow: hidden;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .section-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+    h3 { margin: 0; font-size: 15px; font-weight: 700; }
+    .section-title span, .meta, .detail, .path {
+      color: var(--muted);
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .section-title span { font-size: 12px; }
     .status-list, .task-list, .history-list { display: grid; gap: 0; }
     .status-row, .task-row, .history-row {
       display: grid;
-      gap: 10px;
-      padding: 14px 16px;
+      gap: 8px;
+      padding: 13px 16px;
       border-bottom: 1px solid var(--line);
     }
     .status-row:last-child, .task-row:last-child, .history-row:last-child { border-bottom: 0; }
+    .status-row:hover, .task-row:hover, .history-row:hover { background: var(--surface-soft); }
     .row-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
-    .name { font-weight: 650; min-width: 0; overflow-wrap: anywhere; }
-    .summary, .meta, .detail, .path { color: var(--muted); line-height: 1.5; overflow-wrap: anywhere; }
-    .summary { color: #3b4658; }
+    .name {
+      font-weight: 700;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .summary {
+      color: #39465a;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .path {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 12px;
+    }
     .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       min-width: 54px;
-      height: 26px;
+      height: 25px;
       padding: 0 9px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 650;
+      font-weight: 700;
       border: 1px solid transparent;
+      flex: 0 0 auto;
     }
     .success { color: var(--good); background: #eaf7ef; border-color: #b9e4c6; }
-    .failed { color: var(--bad); background: #fff1f0; border-color: #f2b8b5; }
+    .failed { color: var(--bad); background: #fff1f0; border-color: #efaaa5; }
     .warning { color: var(--warn); background: #fff7e6; border-color: #ffd591; }
     .unknown, .idle { color: var(--idle); background: #f1f3f6; border-color: #d9dee7; }
-    .task-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .task-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+    .kpi-mark.success { background: var(--good); border: 0; }
+    .kpi-mark.failed { background: var(--bad); border: 0; }
+    .kpi-mark.warning { background: var(--warn); border: 0; }
+    .kpi-mark.unknown, .kpi-mark.idle { background: var(--idle); border: 0; }
+    .task-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+    .task-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
     .confirm {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       padding: 12px 16px;
       border-top: 1px solid var(--line);
-      background: var(--panel-soft);
+      background: var(--surface-soft);
     }
     .confirm input { padding: 0 10px; min-width: 0; }
+    .output-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--line);
+      background: #111827;
+      color: #d9e2ef;
+      font-size: 12px;
+      font-weight: 700;
+    }
     pre {
       margin: 0;
       padding: 14px 16px;
-      height: 330px;
+      height: 300px;
       overflow: auto;
-      border-top: 1px solid var(--line);
-      background: #101828;
+      background: #111827;
       color: #edf2f7;
       font-family: Consolas, "Cascadia Mono", monospace;
       font-size: 12px;
       line-height: 1.5;
       white-space: pre-wrap;
     }
-    .toolbar { display: flex; align-items: center; gap: 8px; }
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel-soft);
-    }
-    .kpi {
-      display: grid;
-      gap: 3px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      min-height: 64px;
-    }
-    .kpi strong { font-size: 20px; line-height: 1; }
-    .kpi span { color: var(--muted); font-size: 12px; }
     .empty {
       padding: 18px 16px;
       color: var(--muted);
       line-height: 1.6;
     }
-    @media (max-width: 1280px) {
-      main { grid-template-columns: 1fr 1fr; }
-      section.tasks-panel { grid-column: 1 / -1; }
+    @media (max-width: 1180px) {
+      .app-shell { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        padding: 12px 14px;
+      }
+      .brand { padding-bottom: 10px; }
+      nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 12px 0 0;
+      }
+      .nav-note { display: none; }
+      .grid { grid-template-columns: 1fr; }
     }
-    @media (max-width: 860px) {
-      main { grid-template-columns: 1fr; }
-      header { padding: 0 16px; }
-      .task-grid, .confirm { grid-template-columns: 1fr; }
+    @media (max-width: 760px) {
+      .content { padding: 12px; }
+      header { grid-template-columns: 1fr; }
+      .toolbar { flex-wrap: wrap; }
+      nav { grid-template-columns: 1fr; }
       .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .task-grid, .confirm { grid-template-columns: 1fr; }
+      .task-actions { justify-content: flex-start; }
+      select { min-width: 0; width: 100%; }
+      .section-head { align-items: stretch; flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="title-block">
-      <h1>个人工作台</h1>
-      <div class="title-sub">自动化状态、历史记录、任务入口</div>
-    </div>
-    <div class="toolbar">
-      <button id="refreshBtn">刷新状态</button>
-      <button id="statusBtn" class="primary">运行状态检查</button>
-    </div>
-  </header>
-  <main>
-    <section>
-      <div class="section-head">
-        <h2>项目状态</h2>
-        <span class="meta" id="statusMeta">读取中</span>
+  <div class="app-shell">
+    <aside>
+      <div class="brand">
+        <h1>个人工作台</h1>
+        <div class="brand-sub">ERP、Notion、拼多多、小程序自动化统一入口</div>
       </div>
+      <nav aria-label="工作台导航">
+        <a href="#overview"><span class="nav-dot"></span>状态总览</a>
+        <a href="#history"><span class="nav-dot"></span>Agent 历史</a>
+        <a href="#tasks"><span class="nav-dot"></span>任务执行</a>
+      </nav>
+      <div class="nav-note">真实任务需要输入 EXECUTE。状态检查和历史查看只读，不会写 Notion 或执行上架。</div>
+    </aside>
+    <div class="content">
+      <header>
+        <div class="page-title">
+          <h2>自动化控制台</h2>
+          <p>看每个项目现在的状态、按 agent 查历史记录、预览或手动确认执行脚本。</p>
+        </div>
+        <div class="toolbar">
+          <button id="refreshBtn">刷新状态</button>
+          <button id="statusBtn" class="primary">运行状态检查</button>
+        </div>
+      </header>
       <div class="kpis" id="kpis"></div>
-      <div class="status-list" id="statusList"></div>
-    </section>
-    <section>
-      <div class="section-head">
-        <h2>Agent 历史记录</h2>
-        <select id="agentSelect"></select>
-      </div>
-      <div class="history-list" id="historyList"></div>
-    </section>
-    <section class="tasks-panel">
-      <div class="section-head">
-        <h2>任务入口</h2>
-        <span class="meta">执行任务需要确认</span>
-      </div>
-      <div class="task-list" id="taskList"></div>
-      <div class="confirm">
-        <input id="confirmText" placeholder="执行真实任务前输入 EXECUTE" />
-        <button id="clearOutputBtn">清空输出</button>
-      </div>
-      <pre id="output">等待操作。</pre>
-    </section>
-  </main>
+      <main class="grid">
+        <section id="overview" class="span-all">
+          <div class="section-head">
+            <div class="section-title">
+              <h3>项目状态</h3>
+              <span>读取四个现有项目的日志和草稿历史</span>
+            </div>
+            <span class="meta" id="statusMeta">读取中</span>
+          </div>
+          <div class="status-list" id="statusList"></div>
+        </section>
+        <section id="history">
+          <div class="section-head">
+            <div class="section-title">
+              <h3>Agent 历史记录</h3>
+              <span>选择 agent 后查看最近 20 条运行或保存记录</span>
+            </div>
+            <select id="agentSelect" aria-label="选择 Agent"></select>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+        <section id="tasks">
+          <div class="section-head">
+            <div class="section-title">
+              <h3>任务入口</h3>
+              <span>先预览命令，真实执行需要确认</span>
+            </div>
+            <span class="meta">受保护</span>
+          </div>
+          <div class="task-list" id="taskList"></div>
+          <div class="confirm">
+            <input id="confirmText" placeholder="执行真实任务前输入 EXECUTE" />
+            <button id="clearOutputBtn">清空输出</button>
+          </div>
+          <div class="output-head">
+            <span>运行输出</span>
+            <span>本机 127.0.0.1</span>
+          </div>
+          <pre id="output">等待操作。</pre>
+        </section>
+      </main>
+    </div>
+  </div>
   <script>
     const statusList = document.getElementById("statusList");
     const statusMeta = document.getElementById("statusMeta");
@@ -291,8 +455,11 @@ INDEX_HTML = r"""<!doctype html>
         data.forEach(item => { counts[item.status] = (counts[item.status] || 0) + 1; });
         kpis.innerHTML = statusOrder.map(key => `
           <div class="kpi">
-            <strong>${counts[key] || 0}</strong>
-            <span>${escapeHTML(key)}</span>
+            <div>
+              <strong>${counts[key] || 0}</strong>
+              <span>${escapeHTML(key)}</span>
+            </div>
+            <i class="kpi-mark ${badgeClass(key)}"></i>
           </div>
         `).join("");
         statusList.innerHTML = data.map(item => `
