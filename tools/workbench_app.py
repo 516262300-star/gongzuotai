@@ -767,12 +767,9 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             process = subprocess.Popen(
                 command,
                 cwd=WORKBENCH_ROOT,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                bufsize=1,
+                bufsize=0,
                 env=env,
             )
         except OSError as exc:
@@ -781,8 +778,8 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
 
         assert process.stdout is not None
         try:
-            for line in process.stdout:
-                self.write_stream(line)
+            for line in iter(process.stdout.readline, b""):
+                self.write_stream(decode_process_output(line))
             exit_code = process.wait()
             self.write_stream(f"\n[工作台] 任务结束，退出码：{exit_code}\n")
         except (BrokenPipeError, ConnectionResetError):
@@ -791,6 +788,16 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
     def write_stream(self, text: str) -> None:
         self.wfile.write(text.encode("utf-8", errors="replace"))
         self.wfile.flush()
+
+
+def decode_process_output(data: bytes) -> str:
+    """Decode mixed Windows subprocess output before streaming it to the browser."""
+    for encoding in ("utf-8-sig", "utf-8", "gbk", "cp936"):
+        try:
+            return data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return data.decode("utf-8", errors="replace")
 
 
 def read_workbench_runs(limit: int = 20) -> list[dict[str, object]]:
