@@ -55,5 +55,6 @@
 - 只检查、不写入 Notion：传给工作台 `--check-only`，由工作台转为广告脚本的 `--dry-run`。
 - 重新登录并同步：传给 `--relogin`。
 - 打开日志文件夹：打开 `D:\desktop\codex\guanggao\debug`。
+- 页面不再额外显示底部通用任务行；`pdd-ads-catchup` 和 `pdd-ads-sync-all` 仍作为底层任务保留，由广告同步专用按钮统一调用。
 
 真实执行仍然必须在网页输入 `EXECUTE`，避免误写 Notion。

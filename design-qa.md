@@ -28,6 +28,7 @@
 - Added the option-3 top control bar, Agent icons, status filters, risk labels, six-metric detail header, and command preview area.
 - Added a dedicated `拼多多广告数据同步` panel matching the local desktop script controls: single date, range start/end, store, check-only, sync buttons, stop button, and log-folder button.
 - Extended `tools/workbench_run.py` so the workbench can pass ads sync `--date`, `--range`, `--store`, `--relogin`, and `--check-only` into the existing `guanggao` scripts.
+- Hid the duplicated generic `pdd-ads-catchup` and `pdd-ads-sync-all` rows from the `拼多多广告同步` run page; the dedicated panel is now the single visible entry point.
 
 **Follow-up Polish**
 - P3: Add per-run parsed counters for ads sync output, similar to the ERP miniapp history details.

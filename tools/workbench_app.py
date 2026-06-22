@@ -1146,8 +1146,11 @@ INDEX_HTML = r"""<!doctype html>
         return;
       }
       const adsPanel = selectedAgent === "pdd_ads" ? renderAdsPanel() : "";
-      const runPanel = renderRunPanel(tasks);
-      taskList.innerHTML = adsPanel + runPanel + tasks.map(task => `
+      const visibleTasks = selectedAgent === "pdd_ads"
+        ? tasks.filter(task => task.id === "pdd-ads-sync-all")
+        : tasks;
+      const runPanel = renderRunPanel(visibleTasks);
+      const genericTaskRows = selectedAgent === "pdd_ads" ? "" : visibleTasks.map(task => `
         <div class="task-row">
           <div class="task-grid">
             <div>
@@ -1163,6 +1166,7 @@ INDEX_HTML = r"""<!doctype html>
           </div>
         </div>
       `).join("");
+      taskList.innerHTML = adsPanel + runPanel + genericTaskRows;
     }
 
     function renderRunPanel(tasks) {
