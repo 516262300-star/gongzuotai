@@ -70,7 +70,7 @@ INDEX_HTML = r"""<!doctype html>
     }
     .app-shell {
       display: grid;
-      grid-template-columns: 236px minmax(0, 1fr);
+      grid-template-columns: 318px minmax(0, 1fr);
       min-height: 100vh;
     }
     aside {
@@ -78,17 +78,54 @@ INDEX_HTML = r"""<!doctype html>
       top: 0;
       height: 100vh;
       padding: 18px 14px;
-      background: var(--nav-bg);
-      color: #fff;
+      background: var(--surface);
+      color: var(--text);
+      border-right: 1px solid var(--line);
+      overflow: auto;
     }
     .brand {
       display: grid;
       gap: 5px;
-      padding: 6px 8px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      padding: 6px 8px 14px;
+      border-bottom: 1px solid var(--line);
     }
     h1 { margin: 0; font-size: 18px; font-weight: 700; }
-    .brand-sub { color: var(--nav-muted); font-size: 12px; line-height: 1.5; }
+    .brand-sub { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .agent-tools {
+      display: grid;
+      gap: 10px;
+      padding: 14px 8px 10px;
+    }
+    .agent-search {
+      width: 100%;
+      padding: 0 10px;
+      border-color: var(--line);
+      background: var(--surface-soft);
+    }
+    .agent-list {
+      display: grid;
+      gap: 6px;
+      padding: 0 8px 12px;
+    }
+    .agent-button {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px 10px;
+      align-items: center;
+      width: 100%;
+      min-height: 72px;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      text-align: left;
+      color: var(--text);
+    }
+    .agent-button:hover { background: var(--surface-soft); border-color: var(--line); }
+    .agent-button.active { background: var(--accent-weak); border-color: #b8cffb; }
+    .agent-name { font-weight: 700; overflow-wrap: anywhere; }
+    .agent-sub { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+    .agent-count { color: var(--muted); font-size: 12px; }
     nav { display: grid; gap: 6px; padding: 16px 0; }
     nav a {
       display: flex;
@@ -97,11 +134,11 @@ INDEX_HTML = r"""<!doctype html>
       min-height: 36px;
       padding: 0 10px;
       border-radius: 6px;
-      color: #e8edf5;
+      color: var(--text);
       text-decoration: none;
       font-weight: 600;
     }
-    nav a:hover { background: rgba(255,255,255,.1); }
+    nav a:hover { background: var(--surface-soft); }
     .nav-dot {
       width: 8px;
       height: 8px;
@@ -112,8 +149,8 @@ INDEX_HTML = r"""<!doctype html>
     .nav-note {
       margin: 10px 8px 0;
       padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,.12);
-      color: var(--nav-muted);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
       font-size: 12px;
       line-height: 1.6;
     }
@@ -195,6 +232,79 @@ INDEX_HTML = r"""<!doctype html>
     .kpi-mark.success { background: var(--good); }
     .kpi-mark.failed { background: var(--bad); }
     .kpi-mark.warning { background: var(--warn); }
+    .detail-header {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+    .detail-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 14px;
+    }
+    .detail-title {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+    .detail-title h3 { font-size: 20px; }
+    .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .detail-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .mini-metric {
+      display: grid;
+      gap: 4px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-soft);
+      min-height: 68px;
+    }
+    .mini-metric strong { font-size: 18px; line-height: 1.1; }
+    .mini-metric span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .tab {
+      min-height: 32px;
+      padding: 0 12px;
+      border-color: transparent;
+      background: transparent;
+      font-weight: 650;
+      color: var(--muted);
+    }
+    .tab.active {
+      background: #fff;
+      color: var(--accent);
+      border-color: var(--line);
+    }
+    .tab-panel[hidden] { display: none; }
+    .tab-panel { min-height: 260px; }
+    .panel-note {
+      padding: 12px 16px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+      line-height: 1.5;
+    }
     .grid {
       display: grid;
       grid-template-columns: minmax(430px, 1.1fr) minmax(380px, .9fr);
@@ -367,6 +477,7 @@ INDEX_HTML = r"""<!doctype html>
         padding: 12px 14px;
       }
       .brand { padding-bottom: 10px; }
+      .agent-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       nav {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         padding: 12px 0 0;
@@ -379,7 +490,11 @@ INDEX_HTML = r"""<!doctype html>
       header { grid-template-columns: 1fr; }
       .toolbar { flex-wrap: wrap; }
       nav { grid-template-columns: 1fr; }
+      .agent-list { grid-template-columns: 1fr; }
       .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-title-row { display: grid; }
+      .detail-actions { justify-content: flex-start; }
+      .detail-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .task-grid, .confirm { grid-template-columns: 1fr; }
       .task-actions { justify-content: flex-start; }
       select { min-width: 0; width: 100%; }
@@ -394,59 +509,67 @@ INDEX_HTML = r"""<!doctype html>
         <h1>个人工作台</h1>
         <div class="brand-sub">ERP、Notion、拼多多、小程序自动化统一入口</div>
       </div>
-      <nav aria-label="工作台导航">
-        <a href="#overview"><span class="nav-dot"></span>状态总览</a>
-        <a href="#history"><span class="nav-dot"></span>Agent 历史</a>
-        <a href="#tasks"><span class="nav-dot"></span>任务执行</a>
-      </nav>
+      <div class="agent-tools">
+        <input class="agent-search" id="agentSearch" placeholder="搜索 agent" />
+      </div>
+      <div class="agent-list" id="agentList"></div>
       <div class="nav-note">真实任务需要输入 EXECUTE。状态检查和历史查看只读，不会写 Notion 或执行上架。</div>
     </aside>
     <div class="content">
       <header>
         <div class="page-title">
-          <h2>自动化控制台</h2>
-          <p>看每个项目现在的状态、按 agent 查历史记录、预览或手动确认执行脚本。</p>
+          <h2>Agent 详情工作区</h2>
+          <p>左侧选择 agent，右侧集中处理运行、历史和实时日志。</p>
         </div>
         <div class="toolbar">
           <button id="refreshBtn">刷新状态</button>
           <button id="statusBtn" class="primary">运行状态检查</button>
         </div>
       </header>
-      <div class="kpis" id="kpis"></div>
-      <main class="grid">
-        <section id="overview" class="span-all">
-          <div class="section-head">
-            <div class="section-title">
-              <h3>项目状态</h3>
-              <span>读取四个现有项目的日志和草稿历史</span>
-            </div>
-            <span class="meta" id="statusMeta">读取中</span>
+      <section class="detail-header">
+        <div class="detail-title-row">
+          <div class="detail-title">
+            <h3 id="selectedAgentName">读取中</h3>
+            <div class="summary" id="selectedAgentSummary">正在读取 agent 状态。</div>
+            <div class="path" id="selectedAgentSource">-</div>
           </div>
-          <div class="status-list" id="statusList"></div>
-        </section>
-        <section id="history">
-          <div class="section-head">
-            <div class="section-title">
-              <h3>Agent 历史记录</h3>
-              <span>选择 agent 后查看最近 20 条运行或保存记录</span>
-            </div>
+          <div class="detail-actions">
             <select id="agentSelect" aria-label="选择 Agent"></select>
+            <button id="refreshAgentBtn">刷新当前</button>
           </div>
-          <div class="history-list" id="historyList"></div>
-        </section>
-        <section id="tasks">
-          <div class="section-head">
-            <div class="section-title">
-              <h3>任务入口</h3>
-              <span>先预览命令，真实执行需要确认</span>
+        </div>
+        <div class="detail-metrics" id="agentMetrics"></div>
+      </section>
+      <main class="workspace">
+        <section>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="run" type="button">运行</button>
+            <button class="tab" data-tab="history" type="button">历史</button>
+            <button class="tab" data-tab="logs" type="button">日志</button>
+            <button class="tab" data-tab="files" type="button">文件</button>
+          </div>
+          <div class="tab-panel" id="tab-run">
+            <div class="panel-note">只显示当前 agent 相关任务。先点预览，确认无误后再输入 EXECUTE 执行。</div>
+            <div class="task-list" id="taskList"></div>
+            <div class="confirm">
+              <input id="confirmText" placeholder="执行真实任务前输入 EXECUTE" />
+              <button id="clearOutputBtn">清空输出</button>
             </div>
-            <span class="meta">受保护</span>
           </div>
-          <div class="task-list" id="taskList"></div>
-          <div class="confirm">
-            <input id="confirmText" placeholder="执行真实任务前输入 EXECUTE" />
-            <button id="clearOutputBtn">清空输出</button>
+          <div class="tab-panel" id="tab-history" hidden>
+            <div class="panel-note">当前 agent 最近 20 条历史记录，ERP 小程序会展开素材目录、SKU、上传统计和 warning。</div>
+            <div class="history-list" id="historyList"></div>
           </div>
+          <div class="tab-panel" id="tab-logs" hidden>
+            <div class="panel-note">实时输出固定在下方；执行任务时会逐行滚动显示脚本 stdout/stderr。</div>
+            <div class="status-list" id="statusList"></div>
+          </div>
+          <div class="tab-panel" id="tab-files" hidden>
+            <div class="panel-note">当前 agent 的关键目录、日志源和下一步建议。</div>
+            <div class="status-list" id="fileList"></div>
+          </div>
+        </section>
+        <section>
           <div class="output-head">
             <span class="run-state"><i class="run-dot" id="runDot"></i><span id="runStateText">运行输出</span></span>
             <span>本机 127.0.0.1</span>
@@ -462,7 +585,13 @@ INDEX_HTML = r"""<!doctype html>
     const taskList = document.getElementById("taskList");
     const historyList = document.getElementById("historyList");
     const agentSelect = document.getElementById("agentSelect");
-    const kpis = document.getElementById("kpis");
+    const agentList = document.getElementById("agentList");
+    const agentSearch = document.getElementById("agentSearch");
+    const selectedAgentName = document.getElementById("selectedAgentName");
+    const selectedAgentSummary = document.getElementById("selectedAgentSummary");
+    const selectedAgentSource = document.getElementById("selectedAgentSource");
+    const agentMetrics = document.getElementById("agentMetrics");
+    const fileList = document.getElementById("fileList");
     const output = document.getElementById("output");
     const confirmText = document.getElementById("confirmText");
     const runDot = document.getElementById("runDot");
@@ -484,6 +613,18 @@ INDEX_HTML = r"""<!doctype html>
       output.scrollTop = output.scrollHeight;
     };
     const statusOrder = ["成功", "失败", "警告", "未运行"];
+    const taskAgent = {
+      "status": "workbench",
+      "pdd-ads-catchup": "pdd_ads",
+      "pdd-ads-sync-all": "pdd_ads",
+      "pdd-weekly-report": "pdd_weekly",
+      "pdd-publisher": "pdd_publisher",
+      "erp-miniapp-upload": "erp_miniapp"
+    };
+    let allAgents = [];
+    let allStatuses = [];
+    let allTasks = [];
+    let selectedAgent = "erp_miniapp";
     let runningTask = null;
     let runningTimer = null;
     let runningStartedAt = 0;
@@ -498,21 +639,109 @@ INDEX_HTML = r"""<!doctype html>
     }
 
     async function loadStatus() {
-      statusMeta.textContent = "读取中";
       try {
         const data = await fetchJSON("/api/status");
-        const counts = Object.fromEntries(statusOrder.map(key => [key, 0]));
-        data.forEach(item => { counts[item.status] = (counts[item.status] || 0) + 1; });
-        kpis.innerHTML = statusOrder.map(key => `
-          <div class="kpi">
-            <div>
-              <strong>${counts[key] || 0}</strong>
-              <span>${escapeHTML(key)}</span>
-            </div>
-            <i class="kpi-mark ${badgeClass(key)}"></i>
+        allStatuses = data;
+        renderAgentList();
+        renderSelectedAgent();
+      } catch (error) {
+        selectedAgentSummary.textContent = `读取失败：${error.message}`;
+      }
+    }
+
+    function statusForAgent(agentId) {
+      if (agentId === "workbench") {
+        return {
+          id: "workbench",
+          name: "工作台运行记录",
+          status: "成功",
+          summary: "工作台本机服务已启动。",
+          latest_time: new Date().toLocaleTimeString(),
+          source: "D:\\desktop\\codex\\工作台",
+          next_action: "选择任务预览或执行。"
+        };
+      }
+      return allStatuses.find(item => item.id === agentId) || {
+        id: agentId,
+        name: agentName(agentId),
+        status: "未知",
+        summary: "暂未读取到状态。",
+        latest_time: "-",
+        source: "-",
+        next_action: "刷新状态。"
+      };
+    }
+
+    function agentName(agentId) {
+      return allAgents.find(agent => agent.id === agentId)?.name || agentId;
+    }
+
+    function tasksForAgent(agentId) {
+      return allTasks.filter(task => taskAgent[task.id] === agentId);
+    }
+
+    function renderAgentList() {
+      const query = (agentSearch.value || "").trim().toLowerCase();
+      const filtered = allAgents.filter(agent => !query || agent.name.toLowerCase().includes(query) || agent.id.includes(query));
+      agentList.innerHTML = filtered.map(agent => {
+        const status = statusForAgent(agent.id);
+        const taskCount = tasksForAgent(agent.id).length;
+        return `
+          <button class="agent-button ${agent.id === selectedAgent ? "active" : ""}" data-agent="${escapeHTML(agent.id)}" type="button">
+            <span class="agent-name">${escapeHTML(agent.name)}</span>
+            <span class="badge ${badgeClass(status.status)}">${escapeHTML(status.status)}</span>
+            <span class="agent-sub">${escapeHTML(status.summary)}</span>
+            <span class="agent-count">${taskCount} 个任务</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderSelectedAgent() {
+      const status = statusForAgent(selectedAgent);
+      const tasks = tasksForAgent(selectedAgent);
+      selectedAgentName.textContent = status.name || agentName(selectedAgent);
+      selectedAgentSummary.textContent = status.summary || "-";
+      selectedAgentSource.textContent = status.source || "-";
+      agentMetrics.innerHTML = [
+        ["状态", status.status || "未知"],
+        ["最近时间", status.latest_time || "-"],
+        ["任务数", String(tasks.length)],
+        ["建议", status.next_action || "-"]
+      ].map(([label, value]) => `
+        <div class="mini-metric">
+          <strong>${escapeHTML(value)}</strong>
+          <span>${escapeHTML(label)}</span>
+        </div>
+      `).join("");
+      statusList.innerHTML = `
+        <div class="status-row">
+          <div class="row-top">
+            <div class="name">${escapeHTML(status.name || agentName(selectedAgent))}</div>
+            <span class="badge ${badgeClass(status.status)}">${escapeHTML(status.status)}</span>
           </div>
-        `).join("");
-        statusList.innerHTML = data.map(item => `
+          <div class="summary">${escapeHTML(status.summary)}</div>
+          <div class="meta">最近时间：${escapeHTML(status.latest_time)}</div>
+          <div class="path">${escapeHTML(status.source)}</div>
+          <div class="detail">${escapeHTML(status.next_action)}</div>
+        </div>
+      `;
+      fileList.innerHTML = `
+        <div class="status-row">
+          <div class="name">状态来源</div>
+          <div class="path">${escapeHTML(status.source || "-")}</div>
+        </div>
+        <div class="status-row">
+          <div class="name">任务工作目录</div>
+          ${tasks.map(task => `<div class="path">${escapeHTML(task.name)}：${escapeHTML(task.workdir)}</div>`).join("") || `<div class="summary">暂无关联任务。</div>`}
+        </div>
+      `;
+      renderTasks();
+      loadHistory();
+    }
+
+    function renderAllStatuses() {
+      statusList.innerHTML = allStatuses.map(item => `
           <div class="status-row">
             <div class="row-top">
               <div class="name">${escapeHTML(item.name)}</div>
@@ -524,22 +753,19 @@ INDEX_HTML = r"""<!doctype html>
             <div class="detail">${escapeHTML(item.next_action)}</div>
           </div>
         `).join("");
-        statusMeta.textContent = `已更新 ${new Date().toLocaleTimeString()}`;
-      } catch (error) {
-        statusMeta.textContent = "读取失败";
-        statusList.innerHTML = `<div class="status-row"><div class="summary">${escapeHTML(error.message)}</div></div>`;
-      }
     }
 
     async function loadHistoryAgents() {
       const agents = await fetchJSON("/api/history-agents");
+      allAgents = agents;
       agentSelect.innerHTML = agents.map(agent => `<option value="${escapeHTML(agent.id)}">${escapeHTML(agent.name)}</option>`).join("");
-      agentSelect.value = "workbench";
-      await loadHistory();
+      agentSelect.value = selectedAgent;
+      renderAgentList();
+      renderSelectedAgent();
     }
 
     async function loadHistory() {
-      const agent = agentSelect.value || "workbench";
+      const agent = selectedAgent || "workbench";
       historyList.innerHTML = `<div class="empty">读取中。</div>`;
       try {
         const data = await fetchJSON(`/api/history?agent=${encodeURIComponent(agent)}&limit=20`);
@@ -566,7 +792,18 @@ INDEX_HTML = r"""<!doctype html>
 
     async function loadTasks() {
       const data = await fetchJSON("/api/tasks");
-      taskList.innerHTML = data.map(task => `
+      allTasks = data;
+      renderAgentList();
+      renderSelectedAgent();
+    }
+
+    function renderTasks() {
+      const tasks = tasksForAgent(selectedAgent);
+      if (!tasks.length) {
+        taskList.innerHTML = `<div class="empty">当前 agent 暂无可执行任务。</div>`;
+        return;
+      }
+      taskList.innerHTML = tasks.map(task => `
         <div class="task-row">
           <div class="task-grid">
             <div>
@@ -666,10 +903,44 @@ INDEX_HTML = r"""<!doctype html>
       }
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", loadStatus);
+    function selectAgent(agentId) {
+      selectedAgent = agentId;
+      agentSelect.value = agentId;
+      renderAgentList();
+      renderSelectedAgent();
+    }
+
+    function activateTab(tabName) {
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.tab === tabName);
+      });
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.hidden = panel.id !== `tab-${tabName}`;
+      });
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", async () => {
+      await loadStatus();
+      await loadHistory();
+    });
+    document.getElementById("refreshAgentBtn").addEventListener("click", async () => {
+      await loadStatus();
+      await loadHistory();
+    });
     document.getElementById("statusBtn").addEventListener("click", () => runTask("status", "execute"));
     document.getElementById("clearOutputBtn").addEventListener("click", () => writeOutput("等待操作。"));
-    agentSelect.addEventListener("change", loadHistory);
+    agentSearch.addEventListener("input", renderAgentList);
+    agentSelect.addEventListener("change", () => selectAgent(agentSelect.value));
+    agentList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-agent]");
+      if (!button) return;
+      selectAgent(button.dataset.agent);
+    });
+    document.querySelector(".tabs").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-tab]");
+      if (!button) return;
+      activateTab(button.dataset.tab);
+    });
     taskList.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-task]");
       if (!button) return;
