@@ -1,0 +1,41 @@
+projects:
+  - id: erp-auto-listing
+    name: ERP 自动上架
+    status: planning
+    path: projects/erp-auto-listing
+    owner: lds
+    category: listing
+    readme: projects/erp-auto-listing/README.md
+    runbook: projects/erp-auto-listing/docs/runbook.md
+    external_docs: []
+
+  - id: pdd-weekly-notion-report
+    name: Notion 拼多多周报
+    status: planning
+    path: projects/pdd-weekly-notion-report
+    owner: lds
+    category: reporting
+    readme: projects/pdd-weekly-notion-report/README.md
+    runbook: projects/pdd-weekly-notion-report/docs/runbook.md
+    external_docs: []
+
+  - id: pdd-auto-listing
+    name: 拼多多自动上架
+    status: planning
+    path: projects/pdd-auto-listing
+    owner: lds
+    category: listing
+    readme: projects/pdd-auto-listing/README.md
+    runbook: projects/pdd-auto-listing/docs/runbook.md
+    external_docs: []
+
+  - id: ads-to-notion
+    name: 广告数据自动读取到 Notion
+    status: planning
+    path: projects/ads-to-notion
+    owner: lds
+    category: sync
+    readme: projects/ads-to-notion/README.md
+    runbook: projects/ads-to-notion/docs/runbook.md
+    external_docs: []
+
