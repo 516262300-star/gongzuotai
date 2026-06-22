@@ -158,6 +158,10 @@ INDEX_HTML = r"""<!doctype html>
     button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     button.danger { background: #fff7f5; border-color: #efaaa5; color: var(--bad); }
     button:disabled { opacity: .55; cursor: not-allowed; }
+    .is-running button[data-task],
+    .is-running #statusBtn {
+      pointer-events: none;
+    }
     select { padding: 0 10px; min-width: 210px; }
     .kpis {
       display: grid;
@@ -301,6 +305,25 @@ INDEX_HTML = r"""<!doctype html>
       font-size: 12px;
       font-weight: 700;
     }
+    .run-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .run-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+    .run-dot.active {
+      background: #60a5fa;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: .35; }
+      50% { opacity: 1; }
+    }
     pre {
       margin: 0;
       padding: 14px 16px;
@@ -407,7 +430,7 @@ INDEX_HTML = r"""<!doctype html>
             <button id="clearOutputBtn">清空输出</button>
           </div>
           <div class="output-head">
-            <span>运行输出</span>
+            <span class="run-state"><i class="run-dot" id="runDot"></i><span id="runStateText">运行输出</span></span>
             <span>本机 127.0.0.1</span>
           </div>
           <pre id="output">等待操作。</pre>
@@ -424,6 +447,8 @@ INDEX_HTML = r"""<!doctype html>
     const kpis = document.getElementById("kpis");
     const output = document.getElementById("output");
     const confirmText = document.getElementById("confirmText");
+    const runDot = document.getElementById("runDot");
+    const runStateText = document.getElementById("runStateText");
 
     const badgeClass = (status) => {
       if (status === "成功") return "success";
@@ -437,6 +462,9 @@ INDEX_HTML = r"""<!doctype html>
     }[c]));
     const writeOutput = (text) => { output.textContent = text || ""; };
     const statusOrder = ["成功", "失败", "警告", "未运行"];
+    let runningTask = null;
+    let runningTimer = null;
+    let runningStartedAt = 0;
 
     async function fetchJSON(url, options) {
       const response = await fetch(url, options);
@@ -533,8 +561,52 @@ INDEX_HTML = r"""<!doctype html>
       `).join("");
     }
 
+    function setButtonsDisabled(disabled) {
+      document.querySelectorAll("button[data-task], #statusBtn").forEach(button => {
+        button.disabled = disabled;
+      });
+      document.body.classList.toggle("is-running", disabled);
+    }
+
+    function setRunState(label, active = false) {
+      runStateText.textContent = label;
+      runDot.classList.toggle("active", active);
+    }
+
+    function startRunTimer(task, mode) {
+      runningTask = task;
+      runningStartedAt = Date.now();
+      setButtonsDisabled(true);
+      setRunState(`${mode === "execute" ? "执行中" : "预览中"}：${task} | 0 秒`, true);
+      writeOutput([
+        `正在${mode === "execute" ? "执行" : "预览"}：${task}`,
+        "",
+        "任务运行中，请不要重复点击执行。长任务完成后会在这里显示完整输出。"
+      ].join("\n"));
+      runningTimer = window.setInterval(() => {
+        const seconds = Math.floor((Date.now() - runningStartedAt) / 1000);
+        setRunState(`${mode === "execute" ? "执行中" : "预览中"}：${task} | ${seconds} 秒`, true);
+      }, 1000);
+    }
+
+    function stopRunTimer(success) {
+      if (runningTimer) {
+        window.clearInterval(runningTimer);
+        runningTimer = null;
+      }
+      const seconds = runningStartedAt ? Math.floor((Date.now() - runningStartedAt) / 1000) : 0;
+      setRunState(`${success ? "已完成" : "已失败"}：${runningTask || "-"} | ${seconds} 秒`, false);
+      runningTask = null;
+      runningStartedAt = 0;
+      setButtonsDisabled(false);
+    }
+
     async function runTask(task, mode) {
-      writeOutput(`正在${mode === "execute" ? "执行" : "预览"}：${task}`);
+      if (runningTask) {
+        writeOutput(`已有任务正在运行：${runningTask}\n请等待完成后再执行其他任务。`);
+        return;
+      }
+      startRunTimer(task, mode);
       try {
         const payload = { task, mode, confirm: confirmText.value };
         const data = await fetchJSON("/api/run", {
@@ -543,10 +615,12 @@ INDEX_HTML = r"""<!doctype html>
           body: JSON.stringify(payload)
         });
         writeOutput(data.output || JSON.stringify(data, null, 2));
+        stopRunTimer(data.ok !== false);
         await loadStatus();
         await loadHistory();
       } catch (error) {
         writeOutput(error.message);
+        stopRunTimer(false);
       }
     }
 
