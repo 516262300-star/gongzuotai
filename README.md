@@ -89,6 +89,18 @@ python tools\workbench_run.py pdd-weekly-report --execute
 
 除 `status` 外，真实启动都必须加 `--execute`。
 
+启动本地网页工作台：
+
+```powershell
+python tools\workbench_app.py
+```
+
+默认地址：
+
+```text
+http://127.0.0.1:8787/
+```
+
 查看某个已接入工作台运行记录的脚本状态：
 
 ```powershell

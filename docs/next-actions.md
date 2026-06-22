@@ -64,7 +64,28 @@ python tools/workbench_run.py erp-miniapp-upload --execute
 
 当前已完成命令：`python tools/workbench_run.py --list`。
 
-## 第 4 步：再考虑迁移代码
+## 第 4 步：本地网页工作台
+
+当前已提供本地网页：
+
+```powershell
+python tools/workbench_app.py
+```
+
+默认地址：
+
+```text
+http://127.0.0.1:8787/
+```
+
+页面提供：
+
+- 四个现有项目状态。
+- 已登记任务列表。
+- 任务 dry-run 预览。
+- 输入 `EXECUTE` 后执行真实任务。
+
+## 第 5 步：再考虑迁移代码
 
 在工作台状态和启动入口稳定后，再决定是否把四个项目代码迁入 `projects/`。迁移前必须：
 

@@ -271,3 +271,20 @@ python tools\workbench_run.py pdd-ads-catchup --execute
 ```
 
 除 `status` 外，真实启动都必须显式添加 `--execute`，防止误触发写入 Notion、打开浏览器或启动上架工具。
+
+## 本地网页工作台
+
+当前已提供本地网页：
+
+```powershell
+cd D:\desktop\codex\工作台
+python tools\workbench_app.py
+```
+
+默认地址：
+
+```text
+http://127.0.0.1:8787/
+```
+
+网页只绑定 `127.0.0.1`，用于本机查看状态、预览命令和手动确认执行。

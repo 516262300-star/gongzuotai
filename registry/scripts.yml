@@ -17,6 +17,15 @@ scripts:
     status_command: python tools\workbench_status.py --script workbench-run
     writes_external_system: false
 
+  - id: workbench-app
+    project: workbench
+    name: 工作台本地网页
+    script: tools\workbench_app.py
+    command: python tools\workbench_app.py
+    workdir: D:\desktop\codex\工作台
+    status_command: 打开 http://127.0.0.1:8787/
+    writes_external_system: false
+
   - id: pdd-ads-sync-all
     project: pdd-ads-to-notion
     name: 拼多多广告同步一到七店

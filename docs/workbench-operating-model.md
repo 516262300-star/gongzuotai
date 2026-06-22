@@ -42,4 +42,5 @@
 1. 先读取并登记现有四个项目，确认真实入口、数据流、日志和敏感文件边界。
 2. 再做工作台状态面板，读取现有项目日志和运行历史。当前命令：`python tools/workbench_external_status.py`。
 3. 再做统一启动入口，调用现有项目命令并写入工作台运行记录。当前命令：`python tools/workbench_run.py --list`。
-4. 最后再考虑是否把现有项目迁入 `projects/`，迁移前必须同步 README、runbook 和任务计划路径。
+4. 再做本地网页工作台。当前命令：`python tools/workbench_app.py`。
+5. 最后再考虑是否把现有项目迁入 `projects/`，迁移前必须同步 README、runbook 和任务计划路径。
