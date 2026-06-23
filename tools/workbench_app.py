@@ -186,7 +186,7 @@ INDEX_HTML = r"""<!doctype html>
     }
     .agent-button {
       display: grid;
-      grid-template-columns: 42px minmax(0, 1fr) auto;
+      grid-template-columns: 42px minmax(0, 1fr) 58px;
       gap: 5px 10px;
       align-items: center;
       width: 100%;
@@ -217,10 +217,37 @@ INDEX_HTML = r"""<!doctype html>
     .icon-pdd_ads, .icon-pdd_publisher { background: #dc2626; }
     .icon-pdd_weekly { background: #111827; }
     .icon-erp_miniapp { background: #2563eb; }
-    .agent-name { grid-column: 2; grid-row: 1; font-weight: 700; overflow-wrap: anywhere; }
+    .agent-name {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .agent-button .badge { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
-    .agent-sub { grid-column: 2 / 4; grid-row: 2; color: var(--muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
-    .agent-count { grid-column: 2; grid-row: 3; color: var(--muted); font-size: 12px; }
+    .agent-sub {
+      grid-column: 2 / 4;
+      grid-row: 2;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .agent-count {
+      grid-column: 2;
+      grid-row: 3;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .risk {
       grid-column: 3;
       grid-row: 3;
@@ -743,7 +770,7 @@ INDEX_HTML = r"""<!doctype html>
       <span>本机 127.0.0.1</span>
       <button class="icon-btn" type="button" title="设置">⚙</button>
       <button class="icon-btn" type="button" title="帮助">?</button>
-      <span>运营同学</span>
+      <span>金博敏</span>
     </div>
   </div>
   <div class="app-shell">
