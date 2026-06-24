@@ -1,12 +1,12 @@
 param(
-    [ValidateSet("Install", "Uninstall", "Status", "Run")]
+    [ValidateSet("Install", "Uninstall", "Status", "Ensure", "Run")]
     [string]$Mode = "Install"
 )
 
 $ErrorActionPreference = "Stop"
 
 $TaskName = "CodexWorkbenchApp"
-$TaskDescription = "Start the Codex personal workbench web app at Windows logon."
+$TaskDescription = "Keep the Codex personal workbench web app running for the current user."
 $Port = 8787
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $AppScript = Join-Path $RepoRoot "tools\workbench_app.py"
@@ -69,7 +69,7 @@ function Install-Task {
         "-ExecutionPolicy", "Bypass",
         "-WindowStyle", "Hidden",
         "-File", (Quote-Argument $scriptPath),
-        "-Mode", "Run"
+        "-Mode", "Ensure"
     ) -join " "
 
     $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
@@ -77,12 +77,17 @@ function Install-Task {
         -Execute "powershell.exe" `
         -Argument $actionArgs `
         -WorkingDirectory $RepoRoot
-    $trigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
+    $logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $identity
+    $watchdogTrigger = New-ScheduledTaskTrigger `
+        -Once `
+        -At (Get-Date).Date `
+        -RepetitionInterval (New-TimeSpan -Minutes 5) `
+        -RepetitionDuration (New-TimeSpan -Days 3650)
     $settings = New-ScheduledTaskSettingsSet `
         -MultipleInstances IgnoreNew `
         -RestartCount 3 `
         -RestartInterval (New-TimeSpan -Minutes 1) `
-        -ExecutionTimeLimit ([TimeSpan]::Zero) `
+        -ExecutionTimeLimit (New-TimeSpan -Minutes 2) `
         -AllowStartIfOnBatteries `
         -DontStopIfGoingOnBatteries
     $principal = New-ScheduledTaskPrincipal `
@@ -93,7 +98,7 @@ function Install-Task {
     Register-ScheduledTask `
         -TaskName $TaskName `
         -Action $action `
-        -Trigger $trigger `
+        -Trigger @($logonTrigger, $watchdogTrigger) `
         -Settings $settings `
         -Principal $principal `
         -Description $TaskDescription `
@@ -101,12 +106,8 @@ function Install-Task {
 
     Write-Host "Installed scheduled task: $TaskName"
 
-    if (-not (Get-WorkbenchListener)) {
-        Start-ScheduledTask -TaskName $TaskName
-        Write-Host "Started scheduled task now."
-    } else {
-        Write-Host "127.0.0.1:$Port is already listening; skipped duplicate start."
-    }
+    Start-ScheduledTask -TaskName $TaskName
+    Write-Host "Started scheduled task now."
 }
 
 function Uninstall-Task {
@@ -136,9 +137,43 @@ function Run-Server {
     & $pythonExe $AppScript 1>> $StdoutLog 2>> $StderrLog
 }
 
+function Ensure-Server {
+    New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+
+    $listener = Get-WorkbenchListener
+    if ($listener) {
+        Write-AutostartLog "127.0.0.1:$Port already listening; PID $($listener.OwningProcess)"
+        return
+    }
+
+    $pythonExe = Get-PythonExe
+    Write-AutostartLog "127.0.0.1:$Port not listening; starting workbench app with $pythonExe"
+    $process = Start-Process `
+        -FilePath $pythonExe `
+        -ArgumentList @($AppScript) `
+        -WorkingDirectory $RepoRoot `
+        -WindowStyle Hidden `
+        -RedirectStandardOutput $StdoutLog `
+        -RedirectStandardError $StderrLog `
+        -PassThru
+
+    Start-Sleep -Seconds 2
+    $listener = Get-WorkbenchListener
+    if ($listener) {
+        Write-AutostartLog "Started workbench app. PID $($listener.OwningProcess)"
+        return
+    }
+
+    if ($process.HasExited) {
+        throw "Workbench app exited immediately with code $($process.ExitCode). See $StderrLog"
+    }
+    throw "Workbench app process started as PID $($process.Id), but 127.0.0.1:$Port is not listening yet."
+}
+
 switch ($Mode) {
     "Install" { Install-Task; Show-Status }
     "Uninstall" { Uninstall-Task; Show-Status }
     "Status" { Show-Status }
+    "Ensure" { Ensure-Server }
     "Run" { Run-Server }
 }
