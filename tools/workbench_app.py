@@ -585,6 +585,27 @@ INDEX_HTML = r"""<!doctype html>
       overflow-wrap: anywhere;
     }
     .section-title span { font-size: 12px; }
+    .history-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      flex-wrap: wrap;
+    }
+    .history-toolbar .meta { font-size: 12px; }
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .history-actions button {
+      min-height: 32px;
+      padding: 0 11px;
+    }
     .status-list, .task-list, .history-list { display: grid; gap: 0; }
     .status-row, .task-row, .history-row {
       display: grid;
@@ -840,7 +861,14 @@ INDEX_HTML = r"""<!doctype html>
             </div>
           </div>
           <div class="tab-panel" id="tab-history" hidden>
-            <div class="panel-note">当前 agent 最近 20 条历史记录，ERP 小程序会展开素材目录、SKU、上传统计和 warning。</div>
+            <div class="panel-note">当前 agent 历史记录按页显示，每页 20 条；ERP 小程序会展开素材目录、SKU、上传统计和 warning。</div>
+            <div class="history-toolbar">
+              <span class="meta" id="historyMeta">读取中。</span>
+              <div class="history-actions">
+                <button id="historyPrevBtn" type="button">上一页</button>
+                <button id="historyNextBtn" type="button">下一页</button>
+              </div>
+            </div>
             <div class="history-list" id="historyList"></div>
           </div>
           <div class="tab-panel" id="tab-logs" hidden>
@@ -867,6 +895,9 @@ INDEX_HTML = r"""<!doctype html>
     const statusMeta = document.getElementById("statusMeta");
     const taskList = document.getElementById("taskList");
     const historyList = document.getElementById("historyList");
+    const historyMeta = document.getElementById("historyMeta");
+    const historyPrevBtn = document.getElementById("historyPrevBtn");
+    const historyNextBtn = document.getElementById("historyNextBtn");
     const agentSelect = document.getElementById("agentSelect");
     const agentList = document.getElementById("agentList");
     const agentSearch = document.getElementById("agentSearch");
@@ -940,6 +971,9 @@ INDEX_HTML = r"""<!doctype html>
     let allTasks = [];
     let selectedAgent = "erp_miniapp";
     let agentFilter = "all";
+    const historyPageSize = 20;
+    let historyOffset = 0;
+    let historyTotal = 0;
     let runningTask = null;
     let runningTimer = null;
     let runningStartedAt = 0;
@@ -1136,13 +1170,26 @@ INDEX_HTML = r"""<!doctype html>
     async function loadHistory() {
       const agent = selectedAgent || "workbench";
       historyList.innerHTML = `<div class="empty">读取中。</div>`;
+      historyMeta.textContent = "读取中。";
+      historyPrevBtn.disabled = true;
+      historyNextBtn.disabled = true;
       try {
-        const data = await fetchJSON(`/api/history?agent=${encodeURIComponent(agent)}&limit=20`);
-        if (!data.length) {
+        const data = await fetchJSON(`/api/history?agent=${encodeURIComponent(agent)}&limit=${historyPageSize}&offset=${historyOffset}`);
+        const items = data.items || [];
+        historyTotal = Number(data.total || 0);
+        historyOffset = Number(data.offset || 0);
+        const start = historyTotal ? historyOffset + 1 : 0;
+        const end = historyOffset + items.length;
+        historyMeta.textContent = historyTotal
+          ? `第 ${Math.floor(historyOffset / historyPageSize) + 1} 页，显示 ${start}-${end} / 共 ${historyTotal} 条`
+          : "共 0 条";
+        historyPrevBtn.disabled = historyOffset <= 0;
+        historyNextBtn.disabled = !data.has_more;
+        if (!items.length) {
           historyList.innerHTML = `<div class="empty">暂无历史记录。</div>`;
           return;
         }
-        historyList.innerHTML = data.map(item => `
+        historyList.innerHTML = items.map(item => `
           <div class="history-row">
             <div class="row-top">
               <div class="name">${escapeHTML(item.title)}</div>
@@ -1155,6 +1202,7 @@ INDEX_HTML = r"""<!doctype html>
           </div>
         `).join("");
       } catch (error) {
+        historyMeta.textContent = "读取失败。";
         historyList.innerHTML = `<div class="empty">${escapeHTML(error.message)}</div>`;
       }
     }
@@ -1406,6 +1454,7 @@ INDEX_HTML = r"""<!doctype html>
 
     function selectAgent(agentId) {
       selectedAgent = agentId;
+      historyOffset = 0;
       agentSelect.value = agentId;
       renderAgentList();
       renderSelectedAgent();
@@ -1443,6 +1492,16 @@ INDEX_HTML = r"""<!doctype html>
       renderAgentList();
     });
     agentSelect.addEventListener("change", () => selectAgent(agentSelect.value));
+    historyPrevBtn.addEventListener("click", () => {
+      historyOffset = Math.max(0, historyOffset - historyPageSize);
+      loadHistory();
+    });
+    historyNextBtn.addEventListener("click", () => {
+      if (historyOffset + historyPageSize < historyTotal) {
+        historyOffset += historyPageSize;
+        loadHistory();
+      }
+    });
     agentList.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-agent]");
       if (!button) return;
@@ -1523,7 +1582,25 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                 limit = int((query.get("limit") or ["20"])[0])
             except ValueError:
                 limit = 20
-            self.send_json([asdict(item) for item in collect_history(agent, limit=max(1, min(limit, 100)))])
+            try:
+                offset = int((query.get("offset") or ["0"])[0])
+            except ValueError:
+                offset = 0
+            limit = max(1, min(limit, 100))
+            offset = max(0, offset)
+            items, total = collect_history(agent, limit=limit, offset=offset)
+            if offset >= total and total:
+                offset = max(0, ((total - 1) // limit) * limit)
+                items, total = collect_history(agent, limit=limit, offset=offset)
+            self.send_json(
+                {
+                    "items": [asdict(item) for item in items],
+                    "total": total,
+                    "limit": limit,
+                    "offset": offset,
+                    "has_more": offset + len(items) < total,
+                }
+            )
             return
         self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
@@ -1658,7 +1735,12 @@ def decode_process_output(data: bytes) -> str:
     return data.decode("utf-8", errors="replace")
 
 
-def read_workbench_runs(limit: int = 20) -> list[dict[str, object]]:
+def page_entries(entries: list[HistoryEntry], limit: int, offset: int) -> tuple[list[HistoryEntry], int]:
+    total = len(entries)
+    return entries[offset : offset + limit], total
+
+
+def read_workbench_runs(limit: int | None = 20) -> list[dict[str, object]]:
     if not LOG_PATH.exists():
         return []
     rows: list[dict[str, object]] = []
@@ -1668,6 +1750,8 @@ def read_workbench_runs(limit: int = 20) -> list[dict[str, object]]:
                 rows.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
+    if limit is None:
+        return rows
     return rows[-limit:]
 
 
@@ -1722,9 +1806,10 @@ def history_agents() -> list[dict[str, str]]:
     ]
 
 
-def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
+def collect_history(agent: str, limit: int = 20, offset: int = 0) -> tuple[list[HistoryEntry], int]:
     if agent == "workbench":
-        return [workbench_run_history_entry(row) for row in reversed(read_workbench_runs(limit))]
+        entries = [workbench_run_history_entry(row) for row in reversed(read_workbench_runs(None))]
+        return page_entries(entries, limit, offset)
 
     if agent == "pdd_publisher":
         config = PROJECTS["pdd_publisher"]
@@ -1733,9 +1818,9 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
         data = read_json_file(history_path)
         items = data.get("items") if isinstance(data, dict) else []
         if not isinstance(items, list):
-            return []
+            return [], 0
         entries = []
-        for item in reversed(items[-limit:]):
+        for item in reversed(items):
             if not isinstance(item, dict):
                 continue
             title = str(item.get("title") or "未记录标题")
@@ -1750,26 +1835,26 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
                     source=str(history_path),
                 )
             )
-        return entries
+        return page_entries(entries, limit, offset)
 
     if agent == "erp_miniapp":
-        return collect_erp_miniapp_history(limit)
+        return collect_erp_miniapp_history(limit, offset)
 
     if agent not in PROJECTS:
-        return []
+        return [], 0
 
     config = PROJECTS[agent]
     log_dir = config.get("log_dir")
     patterns = config.get("patterns")
     if not isinstance(log_dir, Path) or not isinstance(patterns, list):
-        return []
+        return [], 0
 
     entries = []
     if agent == "pdd_ads":
         ads_scripts = {"pdd-ads-sync-all", "pdd-ads-catchup"}
         workbench_rows = [
             row
-            for row in read_workbench_runs(max(limit * 10, 100))
+            for row in read_workbench_runs(None)
             if row.get("project") == "pdd-ads-to-notion" and row.get("script") in ads_scripts
         ]
         entries.extend(workbench_run_history_entry(row, manual_label=True) for row in workbench_rows)
@@ -1777,7 +1862,7 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
     files = []
     for pattern in patterns:
         files.extend(path for path in log_dir.glob(pattern) if path.is_file())
-    files = sorted(set(files), key=lambda path: path.stat().st_mtime, reverse=True)[:limit]
+    files = sorted(set(files), key=lambda path: path.stat().st_mtime, reverse=True)
     for path in files:
         text = read_text_tail(path, 220)
         status = classify_history_status(agent, text)
@@ -1791,20 +1876,21 @@ def collect_history(agent: str, limit: int = 20) -> list[HistoryEntry]:
                 source=str(path),
             )
         )
-    return sorted(entries, key=lambda item: item.time, reverse=True)[:limit]
+    entries = sorted(entries, key=lambda item: item.time, reverse=True)
+    return page_entries(entries, limit, offset)
 
 
-def collect_erp_miniapp_history(limit: int = 20) -> list[HistoryEntry]:
+def collect_erp_miniapp_history(limit: int = 20, offset: int = 0) -> tuple[list[HistoryEntry], int]:
     config = PROJECTS["erp_miniapp"]
     log_dir = config.get("log_dir")
     if not isinstance(log_dir, Path) or not log_dir.exists():
-        return []
+        return [], 0
 
     files = sorted(
         [path for path in log_dir.glob("*.log") if path.is_file()],
         key=lambda path: path.stat().st_mtime,
         reverse=True,
-    )[:limit]
+    )
 
     entries: list[HistoryEntry] = []
     for path in files:
@@ -1823,7 +1909,8 @@ def collect_erp_miniapp_history(limit: int = 20) -> list[HistoryEntry]:
                     details=details,
                 )
             )
-    return sorted(entries, key=lambda item: item.time, reverse=True)[:limit]
+    entries = sorted(entries, key=lambda item: item.time, reverse=True)
+    return page_entries(entries, limit, offset)
 
 
 def split_erp_log_sessions(text: str) -> list[tuple[str, str]]:

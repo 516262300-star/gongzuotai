@@ -131,6 +131,8 @@ powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Uni
 - 拼多多自动上架草稿历史
 - 小程序 ERP 自动上架日志历史，会从日志里提取商品标题、素材目录、SKU 行数、上传统计、warning 和最近截图路径
 
+历史记录按页加载，每页 20 条。记录超过一页时可用 `上一页` / `下一页` 翻看更早历史，避免一次性展开过多记录。
+
 查看某个已接入工作台运行记录的脚本状态：
 
 ```powershell
