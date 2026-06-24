@@ -101,6 +101,26 @@ python tools\workbench_app.py
 http://127.0.0.1:8787/
 ```
 
+安装 Windows 登录后自动启动：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Install
+```
+
+查看自动启动状态：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Status
+```
+
+卸载自动启动：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Uninstall
+```
+
+自动启动使用 Windows 计划任务 `CodexWorkbenchApp`，触发条件是当前用户登录 Windows。任务会启动 `tools\workbench_app.py`，计划任务自身日志写入 `logs\workbench_autostart.log`，网页服务输出写入 `logs\workbench_app_stdout.log` 和 `logs\workbench_app_stderr.log`。如果 `127.0.0.1:8787` 已经有工作台服务在监听，脚本不会重复启动。
+
 网页现在采用 Agent 详情工作区布局：左侧是 Agent 列表和搜索，右侧展示当前选中 Agent 的状态摘要、运行、历史、日志和文件信息。运行页只显示当前 Agent 相关任务，执行前可先预览命令；除 `status` 外真实执行都需要输入 `EXECUTE`。任务运行中会锁定执行按钮、显示已运行秒数，并像桌面脚本一样实时滚动显示 stdout/stderr 输出。运行输出会自动兼容 UTF-8 和 Windows GBK/cp936，避免中文日志在网页里乱码。
 
 网页里的 `Agent 历史记录` 下拉框可以查看：

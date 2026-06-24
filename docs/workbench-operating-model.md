@@ -43,7 +43,20 @@
 2. 再做工作台状态面板，读取现有项目日志和运行历史。当前命令：`python tools/workbench_external_status.py`。
 3. 再做统一启动入口，调用现有项目命令并写入工作台运行记录。当前命令：`python tools/workbench_run.py --list`。
 4. 再做本地网页工作台。当前命令：`python tools/workbench_app.py`。
-5. 最后再考虑是否把现有项目迁入 `projects/`，迁移前必须同步 README、runbook 和任务计划路径。
+5. 需要重启后自动恢复时，安装 Windows 登录计划任务。当前命令：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Install`。
+6. 最后再考虑是否把现有项目迁入 `projects/`，迁移前必须同步 README、runbook 和任务计划路径。
+
+## 本地网页自动启动
+
+工作台网页默认监听 `http://127.0.0.1:8787/`。如果只手动运行 `python tools/workbench_app.py`，电脑重启后 Python 进程会消失，浏览器会显示 `ERR_CONNECTION_REFUSED`。
+
+自动启动由 Windows 计划任务 `CodexWorkbenchApp` 管理：
+
+- 安装：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Install`
+- 查看：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Status`
+- 卸载：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Uninstall`
+
+计划任务触发条件是当前用户登录 Windows，执行 `tools/workbench_autostart.ps1 -Mode Run`。计划任务自身日志写入 `logs/workbench_autostart.log`，网页服务输出写入 `logs/workbench_app_stdout.log` 和 `logs/workbench_app_stderr.log`。脚本会先检查 `127.0.0.1:8787` 是否已经监听，避免重复启动多个工作台网页进程。
 
 ## 拼多多广告同步网页控制
 

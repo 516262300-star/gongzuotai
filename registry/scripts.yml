@@ -26,6 +26,15 @@ scripts:
     status_command: 打开 http://127.0.0.1:8787/
     writes_external_system: false
 
+  - id: workbench-app-autostart
+    project: workbench
+    name: 工作台网页登录自动启动
+    script: tools\workbench_autostart.ps1
+    command: powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Install
+    workdir: D:\desktop\codex\工作台
+    status_command: powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Status
+    writes_external_system: false
+
   - id: pdd-ads-sync-all
     project: pdd-ads-to-notion
     name: 拼多多广告同步一到七店
