@@ -10,6 +10,7 @@ $TaskDescription = "Keep the Codex personal workbench web app running for the cu
 $Port = 8787
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $AppScript = Join-Path $RepoRoot "tools\workbench_app.py"
+$HiddenLauncherScript = Join-Path $RepoRoot "tools\workbench_autostart.vbs"
 $LogDir = Join-Path $RepoRoot "logs"
 $StdoutLog = Join-Path $LogDir "workbench_app_stdout.log"
 $StderrLog = Join-Path $LogDir "workbench_app_stderr.log"
@@ -60,21 +61,22 @@ function Install-Task {
     if (-not (Test-Path -LiteralPath $AppScript)) {
         throw "Workbench app script not found: $AppScript"
     }
+    if (-not (Test-Path -LiteralPath $HiddenLauncherScript)) {
+        throw "Hidden launcher script not found: $HiddenLauncherScript"
+    }
 
     New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
-    $scriptPath = $PSCommandPath
     $actionArgs = @(
-        "-NoProfile",
-        "-ExecutionPolicy", "Bypass",
-        "-WindowStyle", "Hidden",
-        "-File", (Quote-Argument $scriptPath),
-        "-Mode", "Ensure"
+        "//B",
+        "//Nologo",
+        (Quote-Argument $HiddenLauncherScript),
+        "Ensure"
     ) -join " "
 
     $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
     $action = New-ScheduledTaskAction `
-        -Execute "powershell.exe" `
+        -Execute "wscript.exe" `
         -Argument $actionArgs `
         -WorkingDirectory $RepoRoot
     $logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $identity

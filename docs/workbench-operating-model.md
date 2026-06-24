@@ -56,7 +56,7 @@
 - 查看：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Status`
 - 卸载：`powershell -ExecutionPolicy Bypass -File tools/workbench_autostart.ps1 -Mode Uninstall`
 
-计划任务触发条件是当前用户登录 Windows，并每 5 分钟守护检查一次，执行 `tools/workbench_autostart.ps1 -Mode Ensure`。脚本会先检查 `127.0.0.1:8787` 是否已经监听，已经监听时直接退出；未监听时后台启动 `tools/workbench_app.py`，避免网页进程被关闭后一直不可访问。计划任务自身日志写入 `logs/workbench_autostart.log`，网页服务输出写入 `logs/workbench_app_stdout.log` 和 `logs/workbench_app_stderr.log`。
+计划任务触发条件是当前用户登录 Windows，并每 5 分钟守护检查一次，通过 `tools/workbench_autostart.vbs` 静默调用 `tools/workbench_autostart.ps1 -Mode Ensure`。这样可以绕开 Windows Terminal 默认终端导致的黑色窗口弹出。脚本会先检查 `127.0.0.1:8787` 是否已经监听，已经监听时直接退出；未监听时后台启动 `tools/workbench_app.py`，避免网页进程被关闭后一直不可访问。计划任务自身日志写入 `logs/workbench_autostart.log`，网页服务输出写入 `logs/workbench_app_stdout.log` 和 `logs/workbench_app_stderr.log`。
 
 ## 拼多多广告同步网页控制
 
