@@ -161,7 +161,19 @@ def last_matches(text: str, patterns: Iterable[str], limit: int = 3) -> list[str
     return list(reversed(matches))
 
 
+def latest_erp_session(text: str) -> str:
+    lines = text.splitlines()
+    session_start = 0
+    for index, line in enumerate(lines):
+        if "启动浏览器：" in line:
+            session_start = index
+    return "\n".join(lines[session_start:])
+
+
 def classify_log(project_id: str, text: str) -> tuple[str, str, list[str], str]:
+    if project_id == "erp_miniapp":
+        text = latest_erp_session(text)
+
     fail_lines = last_matches(text, FAIL_PATTERNS)
     warn_lines = last_matches(text, WARN_PATTERNS)
     success_lines = last_matches(text, SUCCESS_PATTERNS)
