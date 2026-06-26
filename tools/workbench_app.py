@@ -1806,6 +1806,22 @@ def history_agents() -> list[dict[str, str]]:
     ]
 
 
+def draft_goods_id_from_url(url: str) -> str:
+    try:
+        query = parse_qs(urlparse(url).query)
+        return str((query.get("goods_id") or [""])[0])
+    except Exception:
+        return ""
+
+
+def draft_record_key(mall_id: str, goods_id: str) -> str:
+    mall_id = str(mall_id or "").strip()
+    goods_id = str(goods_id or "").strip()
+    if mall_id and goods_id:
+        return f"{mall_id}:{goods_id}"
+    return ""
+
+
 def collect_history(agent: str, limit: int = 20, offset: int = 0) -> tuple[list[HistoryEntry], int]:
     if agent == "workbench":
         entries = [workbench_run_history_entry(row) for row in reversed(read_workbench_runs(None))]
@@ -1825,14 +1841,36 @@ def collect_history(agent: str, limit: int = 20, offset: int = 0) -> tuple[list[
                 continue
             title = str(item.get("title") or "未记录标题")
             mall = str(item.get("mall_name") or item.get("shop_name") or "未知店铺")
-            link = str(item.get("goods_url") or item.get("goods_id") or "")
+            mall_id = str(item.get("mall_id") or "未记录店铺ID")
+            url = str(item.get("goods_url") or item.get("url") or "")
+            goods_id = str(item.get("goods_id") or draft_goods_id_from_url(url) or "未记录商品ID")
+            record_key = str(item.get("record_key") or draft_record_key(mall_id, goods_id) or "")
+            details = [
+                f"店铺：{mall}",
+                f"店铺ID：{mall_id}",
+                f"商品ID：{goods_id}",
+            ]
+            if record_key:
+                details.append(f"记录键：{record_key}")
+            if url:
+                details.append(f"商品链接：{url}")
+            material_path = item.get("material_path")
+            if material_path:
+                details.append(f"图片空间：{material_path}")
+            erp_model = item.get("erp_model")
+            if erp_model:
+                details.append(f"ERP 型号：{erp_model}")
+            product_folder = item.get("product_folder")
+            if product_folder:
+                details.append(f"商品文件夹：{product_folder}")
             entries.append(
                 HistoryEntry(
                     time=str(item.get("saved_at") or "-"),
                     status="成功",
                     title=title,
-                    summary=f"{mall}" + (f" | {link}" if link else ""),
+                    summary=f"店铺：{mall}（{mall_id}） | 商品ID：{goods_id}",
                     source=str(history_path),
+                    details=details,
                 )
             )
         return page_entries(entries, limit, offset)

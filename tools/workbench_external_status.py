@@ -298,8 +298,10 @@ def status_from_draft_history(project_id: str, config: dict[str, object]) -> Pro
             continue
         saved_at = item.get("saved_at") or "-"
         mall = item.get("mall_name") or item.get("shop_name") or "未知店铺"
+        mall_id = item.get("mall_id") or "未记录店铺ID"
+        goods_id = item.get("goods_id") or "未记录商品ID"
         title = item.get("title") or "未记录标题"
-        details.append(f"{saved_at} | {mall} | {title}")
+        details.append(f"{saved_at} | {mall}（{mall_id}） | 商品ID：{goods_id} | {title}")
 
     total = data.get("total")
     if not isinstance(total, int):
@@ -309,11 +311,11 @@ def status_from_draft_history(project_id: str, config: dict[str, object]) -> Pro
         id=project_id,
         name=str(config["name"]),
         status="成功",
-        summary=f"累计保存草稿 {total} 条，最近 {len(details)} 条可查看。",
+        summary=f"累计保存草稿 {total} 条，历史页可查看全部记录。",
         latest_time=format_mtime(path),
         source=str(path),
         details=details,
-        next_action="需要核对时打开拼多多自动上架工作台首页查看草稿历史。",
+        next_action="需要核对时打开工作台历史页，逐条查看店铺 ID 和商品 ID。",
     )
 
 

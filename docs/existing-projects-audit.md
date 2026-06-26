@@ -317,6 +317,8 @@ http://127.0.0.1:8787/
 | 拼多多自动上架 | `D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json` |
 | 小程序 ERP 自动上架 | `D:\desktop\codex\小程序自动上架\erp_auto_upload\logs` |
 
+拼多多自动上架历史页按保存草稿记录分页展示 `saved_draft_history.json` 的全部内容；每条记录会显示商品标题、店铺名、店铺 ID、商品 ID、记录键、商品链接和素材路径，便于长期核对每次保存后的店铺与商品。
+
 小程序 ERP 自动上架历史会额外解析日志内容，尽量展示：
 
 - 运行类型：完整上架流程、上传测试、表单测试、查价或素材解析。
