@@ -7,7 +7,7 @@
 | 项目 | 目录 | 状态 | 说明 |
 | --- | --- | --- | --- |
 | 拼多多广告数据同步到 Notion | `D:\desktop\codex\guanggao` | 已存在 | 从 ERP 抓取拼多多一到七店广告数据，写入 Notion 每日广告数据库。 |
-| Notion 拼多多周报生成器 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` | 已存在 | 从 Notion 7 个店铺广告数据库读取上周数据，生成 Notion 周报页面。 |
+| Notion 拼多多周报生成器 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` | 已存在 | 汇总店铺概况、消费者体验、7 店广告与盈亏，生成完整 Notion 周报页面。 |
 | 拼多多自动上架工具 | `D:\desktop\codex\拼多多自动上架` | 已存在 | 使用 ERP 优质价和图片空间素材生成拼多多上架包，并辅助后台保存草稿。 |
 | 小程序 ERP 自动上架商品工具 | `D:\desktop\codex\小程序自动上架\erp_auto_upload` | 已存在 | 使用本地素材目录在公司自研 ERP 后台新建商品，默认停在保存前。 |
 
@@ -86,6 +86,8 @@ python tools\workbench_run.py status
 python tools\workbench_run.py pdd-weekly-report --dry-run
 python tools\workbench_run.py pdd-weekly-report --execute
 ```
+
+工作台启动拼多多周报时，会自动计算截止日为昨天、开始日为截止日所在月份的 1 日，并使用项目虚拟环境显式传给主脚本。例如 2026-08-08 启动时执行 `.\.venv\Scripts\python.exe main.py --start-date 2026-08-01 --end-date 2026-08-07`，避免盈亏业务线汇总读取跨月区间。
 
 除 `status` 外，真实启动都必须加 `--execute`。
 

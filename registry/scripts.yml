@@ -57,7 +57,7 @@ scripts:
     project: pdd-weekly-report-existing
     name: Notion 拼多多周报生成
     script: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\main.py
-    command: python main.py
+    command: 工作台动态执行 .\.venv\Scripts\python.exe main.py --start-date 月初 --end-date 昨天
     workdir: D:\desktop\codex\notion拼多多周报\pdd_weekly_report
     status_command: 查看 D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs
     writes_external_system: true

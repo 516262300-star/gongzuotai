@@ -20,12 +20,12 @@ external_projects:
     source_path: D:\desktop\codex\notion拼多多周报\pdd_weekly_report
     readme: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\README.md
     category: reporting
-    data_flow: Notion 7 店每日广告数据库 -> Notion 拼多多周报页面
+    data_flow: ERP 店铺概况/消费者体验/盈亏 + Notion 7 店每日广告数据库 -> Notion 完整拼多多周报页面
     primary_commands:
       - python test_connection.py
-      - python main.py
+      - .\.venv\Scripts\python.exe main.py --start-date 月初 --end-date 昨天
     desktop_entry: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\启动拼多多周报生成器.vbs
-    schedule: 建议每周一 10:00 运行 main.py
+    schedule: Codex 个人工作台每周一 09:00；手工启动时按月初至昨天运行
     log_path: D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs
     secrets:
       - D:\desktop\codex\notion拼多多周报\pdd_weekly_report\.env
@@ -61,4 +61,3 @@ external_projects:
     log_path: D:\desktop\codex\小程序自动上架\erp_auto_upload\logs
     secrets:
       - D:\desktop\codex\小程序自动上架\erp_auto_upload\.env
-

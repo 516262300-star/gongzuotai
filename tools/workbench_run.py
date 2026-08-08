@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
+from datetime import timedelta
 from pathlib import Path
 
 from workbench_log import append_record, configure_console, format_time, now_local
@@ -63,9 +64,9 @@ TASKS: dict[str, Task] = {
         name="Notion 拼多多周报生成",
         project="pdd-weekly-report-existing",
         workdir=r"D:\desktop\codex\notion拼多多周报\pdd_weekly_report",
-        command="python main.py",
+        command=r".\.venv\Scripts\python.exe main.py",
         writes_external_system=True,
-        description="读取 Notion 7 店广告库并生成上周拼多多周报。",
+        description="按截止昨天的当月区间生成完整拼多多周报，包含店铺概况、消费者体验、广告和盈亏。",
     ),
     "pdd-publisher": Task(
         id="pdd-publisher",
@@ -135,6 +136,13 @@ def validate_ads_args(args: argparse.Namespace) -> None:
 
 
 def build_task_command(task: Task, args: argparse.Namespace) -> str:
+    if task.id == "pdd-weekly-report":
+        end = now_local().date() - timedelta(days=1)
+        start = end.replace(day=1)
+        return subprocess.list2cmdline(
+            [r".\.venv\Scripts\python.exe", "main.py", "--start-date", start.isoformat(), "--end-date", end.isoformat()]
+        )
+
     if task.id not in {"pdd-ads-sync-all", "pdd-ads-catchup"}:
         return task.command
 
