@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
+from workbench_log import LOG_PATH
+
 
 PROJECTS = {
     "pdd_ads": {
@@ -36,6 +38,11 @@ PROJECTS = {
         "path": Path(r"D:\desktop\codex\小程序自动上架\erp_auto_upload"),
         "log_dir": Path(r"D:\desktop\codex\小程序自动上架\erp_auto_upload\logs"),
         "patterns": ["run_*.log", "*.log"],
+    },
+    "designer_monthly_ppt": {
+        "name": "美工月报 PPT",
+        "path": Path(r"D:\desktop\codex\美工月会ppt\设计师型号月报助手"),
+        "launch_task": "designer-monthly-ppt",
     },
 }
 
@@ -88,7 +95,7 @@ def configure_console() -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="查看现有四个自动化项目的最近状态。")
+    parser = argparse.ArgumentParser(description="查看已接入自动化项目的最近状态。")
     parser.add_argument(
         "--project",
         choices=sorted(PROJECTS),
@@ -319,6 +326,38 @@ def status_from_draft_history(project_id: str, config: dict[str, object]) -> Pro
     )
 
 
+def status_from_launch_history(project_id: str, config: dict[str, object]) -> ProjectStatus:
+    app_path = config["path"] / "app.ps1"
+    result = ProjectStatus(
+        id=project_id,
+        name=str(config["name"]),
+        status="未运行",
+        summary="已接入桌面月报助手，尚无工作台启动记录。",
+        source=str(LOG_PATH),
+        next_action="点击预览后输入 EXECUTE 启动，在桌面窗口录入作品并选择交易数据。",
+    )
+    if not app_path.is_file():
+        result.status = "失败"
+        result.summary = "月报助手入口不存在。"
+        result.source = str(app_path)
+        result.next_action = "恢复源项目目录中的 app.ps1 后再启动。"
+        return result
+    if LOG_PATH.is_file():
+        with LOG_PATH.open(encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(row, dict) or row.get("script") != config["launch_task"]:
+                    continue
+                result.status = "成功" if row.get("status") == "success" else "失败"
+                result.latest_time = str(row.get("finished_at") or row.get("started_at") or "-")[:19].replace("T", " ")
+                result.summary = "最近一次启动已完成；PPT 生成结果请在桌面助手中查看。" if result.status == "成功" else "最近一次启动失败，请查看工作台运行记录。"
+    result.details = ["这里只记录工作台启动结果，不记录 PPT 生成进度。", f"入口：{app_path}"]
+    return result
+
+
 def collect_statuses(project: str | None, tail_lines: int) -> list[ProjectStatus]:
     selected = PROJECTS.items()
     if project:
@@ -326,7 +365,9 @@ def collect_statuses(project: str | None, tail_lines: int) -> list[ProjectStatus
 
     statuses: list[ProjectStatus] = []
     for project_id, config in selected:
-        if "history_path" in config:
+        if "launch_task" in config:
+            statuses.append(status_from_launch_history(project_id, config))
+        elif "history_path" in config:
             statuses.append(status_from_draft_history(project_id, config))
         else:
             statuses.append(status_from_log(project_id, config, tail_lines))

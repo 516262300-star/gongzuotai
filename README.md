@@ -10,6 +10,7 @@
 | Notion 拼多多周报生成器 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` | 已存在 | 汇总店铺概况、消费者体验、7 店广告与盈亏，生成完整 Notion 周报页面。 |
 | 拼多多自动上架工具 | `D:\desktop\codex\拼多多自动上架` | 已存在 | 使用 ERP 优质价和图片空间素材生成拼多多上架包，并辅助后台保存草稿。 |
 | 小程序 ERP 自动上架商品工具 | `D:\desktop\codex\小程序自动上架\erp_auto_upload` | 已存在 | 使用本地素材目录在公司自研 ERP 后台新建商品，默认停在保存前。 |
+| 美工月报 PPT（设计师型号月报助手） | `D:\desktop\codex\美工月会ppt\设计师型号月报助手` | 已接入 | 启动桌面助手，录入作品并结合型号销售利润，生成一份可编辑 PPT。 |
 
 ## 目录说明
 
@@ -21,7 +22,7 @@
 └── AGENTS.md             # Codex/协作规则
 ```
 
-已读取的四个现有项目登记见：
+已读取的现有项目登记见：
 
 ```text
 registry/external-projects.yml
@@ -72,7 +73,7 @@ logs/script-runs.jsonl
 python tools/workbench_status.py
 ```
 
-查看四个现有外部项目状态：
+查看已接入外部项目状态：
 
 ```powershell
 python tools/workbench_external_status.py
@@ -142,6 +143,21 @@ python tools/workbench_status.py --script script_name.py
 ```
 
 已登记现有脚本见 `registry/scripts.yml`。
+
+## 美工月报 PPT
+
+打开 `http://127.0.0.1:8787/`，左侧选择“美工月报 PPT”，点击“预览”，再输入 `EXECUTE` 并点击“执行”。工作台会打开桌面上的“设计师型号月报助手”，保留原有粘贴作品、选择数据和生成完整 PPT 的流程。启动时隐藏控制台，桌面助手窗口正常显示。
+
+也可以从工作台目录运行：
+
+```powershell
+python tools\workbench_run.py designer-monthly-ppt --dry-run
+python tools\workbench_run.py designer-monthly-ppt --execute
+```
+
+输入包括作品图片、型号归属表、当月交易明细、型号图片文件夹和月份。最终仅生成一份可编辑 PPT，作品展示在前，销售利润在后；默认保存到 `D:\desktop\codex\美工月会ppt\output`，实际以助手中“完整 PPT 保存位置”为准。
+
+该工具为手动运行，不新增定时任务，不需要工作台配置凭据，也不写外部系统。状态及历史读取 `logs/script-runs.jsonl` 中的 `designer-monthly-ppt` 启动记录，成功仅表示已启动进程，PPT 生成结果在桌面助手中查看。生成失败按助手提示修正输入后重试，临时文件保留在源项目 `.build` 中；若入口丢失，恢复源项目的 `app.ps1`。使用步骤见源项目 `README.md`。
 
 ## 凭据约定
 

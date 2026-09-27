@@ -217,6 +217,7 @@ INDEX_HTML = r"""<!doctype html>
     .icon-pdd_ads, .icon-pdd_publisher { background: #dc2626; }
     .icon-pdd_weekly { background: #111827; }
     .icon-erp_miniapp { background: #2563eb; }
+    .icon-designer_monthly_ppt { background: #c45e16; }
     .agent-name {
       grid-column: 2;
       grid-row: 1;
@@ -943,14 +944,16 @@ INDEX_HTML = r"""<!doctype html>
       "pdd-ads-sync-all": "pdd_ads",
       "pdd-weekly-report": "pdd_weekly",
       "pdd-publisher": "pdd_publisher",
-      "erp-miniapp-upload": "erp_miniapp"
+      "erp-miniapp-upload": "erp_miniapp",
+      "designer-monthly-ppt": "designer_monthly_ppt"
     };
     const agentIcons = {
       workbench: "工",
       pdd_ads: "拼",
       pdd_weekly: "周",
       pdd_publisher: "上",
-      erp_miniapp: "ERP"
+      erp_miniapp: "ERP",
+      designer_monthly_ppt: "PPT"
     };
     const riskMap = {
       workbench: "低风险",
@@ -964,7 +967,8 @@ INDEX_HTML = r"""<!doctype html>
       pdd_ads: "明日 09:00",
       pdd_weekly: "下周一 10:00",
       pdd_publisher: "手动",
-      erp_miniapp: "手动"
+      erp_miniapp: "手动",
+      designer_monthly_ppt: "手动"
     };
     let allAgents = [];
     let allStatuses = [];
@@ -989,7 +993,7 @@ INDEX_HTML = r"""<!doctype html>
 
     function agentSubtitle(agentId) {
       const task = tasksForAgent(agentId)[0];
-      return `${task ? task.id : agentId} | 外部系统`;
+      return `${task ? task.id : agentId} | ${agentId === "designer_monthly_ppt" ? "本地 PPT 工具" : "外部系统"}`;
     }
 
     function successRate(status) {
@@ -1138,6 +1142,14 @@ INDEX_HTML = r"""<!doctype html>
           <div class="name">任务工作目录</div>
           ${tasks.map(task => `<div class="path">${escapeHTML(task.name)}：${escapeHTML(task.workdir)}</div>`).join("") || `<div class="summary">暂无关联任务。</div>`}
         </div>
+        ${selectedAgent === "designer_monthly_ppt" ? `
+        <div class="status-row">
+          <div class="name">作品素材与 PPT 输出</div>
+          <div class="summary">在桌面助手中粘贴作品图片，并选择型号归属表、当月交易明细和型号图片文件夹。</div>
+          <div class="path">作品素材：${escapeHTML(tasks[0]?.workdir || "")}\\.build\\clipboard-portfolio</div>
+          <div class="path">默认输出：D:\\desktop\\codex\\美工月会ppt\\output</div>
+          <div class="summary">实际文件位置以桌面助手中的“完整 PPT 保存位置”为准。作品展示在前，销售利润在后。</div>
+        </div>` : ""}
       `;
       renderTasks();
       loadHistory();
@@ -1803,6 +1815,7 @@ def history_agents() -> list[dict[str, str]]:
         {"id": "pdd_weekly", "name": "拼多多周报"},
         {"id": "pdd_publisher", "name": "拼多多自动上架"},
         {"id": "erp_miniapp", "name": "小程序 ERP 自动上架"},
+        {"id": "designer_monthly_ppt", "name": "美工月报 PPT"},
     ]
 
 
@@ -1823,6 +1836,14 @@ def draft_record_key(mall_id: str, goods_id: str) -> str:
 
 
 def collect_history(agent: str, limit: int = 20, offset: int = 0) -> tuple[list[HistoryEntry], int]:
+    if agent == "designer_monthly_ppt":
+        entries = [
+            workbench_run_history_entry(row)
+            for row in reversed(read_workbench_runs(None))
+            if row.get("script") == "designer-monthly-ppt"
+        ]
+        return page_entries(entries, limit, offset)
+
     if agent == "workbench":
         entries = [workbench_run_history_entry(row) for row in reversed(read_workbench_runs(None))]
         return page_entries(entries, limit, offset)

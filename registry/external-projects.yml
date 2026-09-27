@@ -1,4 +1,18 @@
 external_projects:
+  - id: designer-monthly-ppt
+    name: 美工月报 PPT（设计师型号月报助手）
+    source_path: D:\desktop\codex\美工月会ppt\设计师型号月报助手
+    readme: D:\desktop\codex\美工月会ppt\设计师型号月报助手\README.md
+    category: reporting
+    data_flow: 作品图片 + 型号归属表 + 当月交易明细 + 型号图片 -> 完整可编辑月会 PPT
+    primary_commands:
+      - powershell.exe -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File .\app.ps1
+    desktop_entry: D:\desktop\设计师型号月报助手.lnk
+    schedule: 手动启动
+    log_path: D:\desktop\codex\工作台\logs\script-runs.jsonl
+    output_path: D:\desktop\codex\美工月会ppt\output
+    secrets: []
+
   - id: pdd-ads-to-notion
     name: 拼多多广告数据同步到 Notion
     source_path: D:\desktop\codex\guanggao
