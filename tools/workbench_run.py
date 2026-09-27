@@ -88,16 +88,6 @@ TASKS: dict[str, Task] = {
         detached=True,
         description="启动 ERP 自研后台自动上架桌面软件。",
     ),
-    "designer-monthly-ppt": Task(
-        id="designer-monthly-ppt",
-        name="美工月报 PPT（设计师型号月报助手）",
-        project="designer-monthly-ppt",
-        workdir=r"D:\desktop\codex\美工月会ppt\设计师型号月报助手",
-        command=r'powershell.exe -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File ".\app.ps1"',
-        writes_external_system=False,
-        detached=True,
-        description="打开桌面月报助手，录入作品、选择型号归属和销售明细，生成一份完整可编辑 PPT。启动记录不代表 PPT 已生成。",
-    ),
 }
 
 
@@ -208,13 +198,7 @@ def run_task(task: Task, command: str) -> int:
 
     if task.detached:
         creationflags = subprocess.CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        process_options = {}
-        if task.id == "designer-monthly-ppt" and os.name == "nt":
-            creationflags = subprocess.CREATE_NO_WINDOW
-            # GUI must not inherit the web response pipe, or the run stays open
-            # until the user closes the desktop assistant.
-            process_options = dict(stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        subprocess.Popen(command, cwd=workdir, shell=True, creationflags=creationflags, **process_options)
+        subprocess.Popen(command, cwd=workdir, shell=True, creationflags=creationflags)
         finished_at = now_local()
         record_run(task, command, "success", 0, started_at, finished_at, "已启动后台进程")
         print(f"[成功] {task.name} 已启动后台进程 | 完成：{format_time(finished_at)}", flush=True)

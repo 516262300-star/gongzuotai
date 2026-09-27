@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美工月报 PPT · 个人工作台</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#202938;background:#fff;font:14px/1.6 "Microsoft YaHei","Segoe UI",sans-serif}button,input,select{font:inherit}button,a.button{cursor:pointer;border:1px solid #cdd6e3;background:#fff;border-radius:6px;padding:8px 14px;color:#263a55;text-decoration:none;display:inline-block}button:hover,a.button:hover{background:#edf4ff}button:disabled{opacity:.55;cursor:wait}.primary{background:#245dd8!important;color:#fff!important;border-color:#245dd8!important}input,select{border:1px solid #cdd6e3;border-radius:5px;padding:8px 10px;max-width:100%;background:#fff;color:#202938}input[type=text]{width:100%}input[type=file]{width:100%;font-size:12px}label{display:block;font-weight:600;margin:0 0 7px}.hint{font-size:12px;color:#69768a;margin:5px 0}.intro{padding:22px 24px 18px;background:#f6f8fc;border-bottom:1px solid #dfe5ee}.intro h1{margin:0 0 5px;font-size:22px}.intro p{margin:0;color:#5e6d82}.section{padding:22px 24px;border-bottom:1px solid #e1e6ee}.section h2{font-size:17px;margin:0 0 15px}.num{color:#245dd8;margin-right:10px}.row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}.field{flex:1;min-width:160px}.small{flex:0 0 145px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.path{font-size:12px;color:#596b82;overflow-wrap:anywhere;margin:5px 0}.drop{margin:16px 0;border:2px dashed #b9c9e3;border-radius:8px;padding:22px;text-align:center;background:#f8faff;outline:none}.drop:focus,.drop.over{border-color:#245dd8;background:#edf4ff}.drop strong{display:block;font-size:15px}.drop button{margin:10px 5px 0}.works{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px}.work{border:1px solid #dfe5ee;border-radius:6px;padding:7px}.work img{width:100%;height:110px;object-fit:contain;background:#f6f7fa}.work p{font-size:12px;margin:5px 0;overflow-wrap:anywhere}.work button{padding:2px 8px;font-size:12px}.group h3{font-size:14px;margin:18px 0 9px}.empty{padding:20px;color:#768498;background:#f7f9fc;text-align:center}details{margin-top:13px}summary{cursor:pointer;color:#496587}details .grid{margin-top:12px}.notice{padding:10px 14px;border-radius:5px;background:#eef5ff;color:#264777;white-space:pre-wrap;margin:12px 0}.error{background:#fff0ef;color:#a62321}.sticky{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;background:#ffffffed;border-top:1px solid #dce4f0;backdrop-filter:blur(8px)}.sticky p{margin:0}.progress{width:100%;height:12px;accent-color:#245dd8}.result-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}.preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:15px}.preview img{width:100%;border:1px solid #d9e0ec;border-radius:4px;cursor:zoom-in}.preview figure{margin:0}.preview figcaption{text-align:center;font-size:12px;color:#69768a}pre{background:#182334;color:#dce7f9;padding:14px;border-radius:5px;max-height:280px;overflow:auto;white-space:pre-wrap;font:12px/1.7 Consolas,monospace}.history-item{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:11px 0;border-bottom:1px solid #e1e6ee}.history-item p{margin:0}dialog{width:min(1000px,96vw);border:1px solid #cbd5e5;border-radius:9px;padding:12px}dialog img{width:100%}dialog::backdrop{background:#17243bb0}[hidden]{display:none!important}@media(max-width:650px){.grid{grid-template-columns:1fr}.section,.intro{padding:16px}.sticky{padding:12px}.small{flex:1}.intro h1{font-size:19px}}
+.preview img{aspect-ratio:16/9;object-fit:contain}
+</style>
+</head>
+<body>
+<header class="intro"><h1>美工月报 PPT</h1><p>录入作品，选择销售数据，在这里生成、预览和下载完整月报。</p></header>
+<main>
+<section class="section">
+<div class="row"><div class="field"><h2><span class="num">01</span>作品展示</h2></div><div class="small"><label for="month">报告月份</label><input id="month" type="month"></div></div>
+<div class="row"><div class="small"><label for="role">身份</label><select id="role"><option>美工</option><option>设计师</option></select></div><div class="field"><label for="person">姓名</label><input id="person" type="text" placeholder="输入本次作品所属人的姓名" autocomplete="off"></div><button id="chooseWorks">选择作品图片</button></div>
+<input id="worksInput" type="file" accept=".png,.jpg,.jpeg,.webp" multiple hidden>
+<div id="drop" class="drop" tabindex="0" aria-label="作品图片粘贴和拖入区域"><strong>复制图片后，点击这里按 Ctrl+V</strong><span class="hint">也可拖入图片；先选择身份并填写姓名。支持 PNG、JPG、WEBP，可连续添加。</span><br><button id="chooseWorkFolder">导入作品文件夹</button><span class="hint">文件夹结构：美工或设计师 / 姓名 / 图片</span></div>
+<input id="workFolderInput" type="file" webkitdirectory multiple hidden>
+<div class="row"><span id="workSummary" class="hint">正在加载已有作品…</span><button id="restore" hidden>恢复已移除作品</button></div>
+<div id="works"></div>
+<div id="uploadMessage" role="status" aria-live="polite"></div>
+</section>
+<section class="section">
+<h2><span class="num">02</span>销售数据与型号图片</h2>
+<div class="grid">
+<div><label for="designerUpload">型号归属表</label><input id="designerUpload" type="file" accept=".xlsx,.xlsm"><div id="designerCurrent" class="path"></div><a href="/api/monthly-ppt/template">下载型号归属表模板</a><p class="hint">需要“型号、设计师”列。</p></div>
+<div><label for="salesUpload">当月交易明细</label><input id="salesUpload" type="file" accept=".xlsx,.xlsm"><div id="salesCurrent" class="path"></div><p class="hint">需要“型号、有效销售、净利”列。</p></div>
+<div><label for="modelsUpload">型号图片文件夹</label><input id="modelsUpload" type="file" webkitdirectory multiple><div id="modelsCurrent" class="path"></div><p class="hint">选择包含“设计师/型号.png”的根文件夹；已有图片可直接沿用。</p></div>
+<div><label for="outputDir">PPT 保存目录</label><input id="outputDir" type="text"><p class="hint">生成文件自动加时间，不覆盖旧月报；完成后也可直接下载。</p><label class="hint"><input id="refreshThumbs" type="checkbox"> 重新生成型号缩略图</label></div>
+</div>
+<details><summary>工作表名称与已有资料路径</summary><div class="grid">
+<div><label for="designerSheet">型号归属工作表</label><input id="designerSheet" type="text"></div>
+<div><label for="salesSheet">交易明细工作表</label><input id="salesSheet" type="text"></div>
+<div><label for="designerPath">已有型号归属表路径</label><input id="designerPath" type="text"></div>
+<div><label for="salesPath">已有交易明细路径</label><input id="salesPath" type="text"></div>
+<div><label for="modelsPath">已有型号图片根目录</label><input id="modelsPath" type="text"></div>
+</div></details>
+<div id="formMessage" role="alert"></div>
+</section>
+<section id="resultSection" class="section" hidden>
+<div class="result-head"><h2><span class="num">03</span>生成结果</h2><a id="download" class="button primary" hidden>下载完整 PPT</a></div>
+<p id="jobMessage" role="status" aria-live="polite"></p><progress id="progress" class="progress" max="100" value="0"></progress><div id="outputPath" class="path"></div>
+<details id="logDetails"><summary>查看生成日志</summary><pre id="jobLog"></pre></details>
+<div id="previews" class="preview"></div>
+</section>
+<section class="section"><h2>历史月报</h2><div id="history" class="hint">尚无网页生成记录。</div></section>
+</main>
+<footer class="sticky"><div><p id="saveState">资料保存在本机工作台</p><span class="hint">作品展示在前，型号销售额与利润在后</span></div><button id="generate" class="primary">生成完整月报 PPT</button></footer>
+<dialog id="previewDialog"><button id="closePreview">关闭预览</button><img id="largePreview" alt="PPT 页面预览"></dialog>
+<script>
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const base='/api/monthly-ppt/';
+let current, selectedJob=null, polling=null, uploadBusy=false, generating=false, settingsQueue=Promise.resolve();
+async function api(path, data) {
+  const response=await fetch(base+path, data === undefined ? {} : {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  const result=await response.json(); if(!response.ok) throw new Error(result.error || '操作失败'); return result;
+}
+function message(id,text,error=false){$(id).className=text ? 'notice'+(error?' error':'') : '';$(id).textContent=text;}
+function form(){return {month:$('month').value,designer_file:$('designerPath').value,sales_file:$('salesPath').value,image_root:$('modelsPath').value,output_dir:$('outputDir').value,designer_sheet:$('designerSheet').value,sales_sheet:$('salesSheet').value,refresh_thumbnails:$('refreshThumbs').checked};}
+function fillSettings(s){for(const [id,key] of Object.entries({month:'month',designerPath:'designer_file',salesPath:'sales_file',modelsPath:'image_root',outputDir:'output_dir',designerSheet:'designer_sheet',salesSheet:'sales_sheet'})) $(id).value=s[key]||'';$('refreshThumbs').checked=s.refresh_thumbnails;showSources();}
+function showSources(){for(const [label,input] of [['designerCurrent','designerPath'],['salesCurrent','salesPath'],['modelsCurrent','modelsPath']]) $(label).textContent='当前使用：'+($(input).value||'尚未选择');}
+function updateButton(){ $('generate').disabled=uploadBusy||generating; $('generate').textContent=generating?'正在生成…':uploadBusy?'正在上传…':'生成完整月报 PPT';}
+function saveSettings(){const values=form();settingsQueue=settingsQueue.catch(()=>{}).then(()=>api('settings',values));return settingsQueue.then(()=>{$('saveState').textContent='资料已自动保存';showSources();}).catch(e=>{message('formMessage',e.message,true);throw e;});}
+function renderWorks(){
+  const active=current.works.filter(w=>w.active), removed=current.works.filter(w=>!w.active);const groups=new Map();
+  active.forEach(w=>{let key=w.role+' · '+w.name;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(w);});
+  $('workSummary').textContent=`已选 ${groups.size} 人，共 ${active.length} 张作品。每人每页最多 10 张，超出自动续页。`;
+  $('restore').hidden=!removed.length;$('restore').textContent=`恢复已移除作品（${removed.length}）`;
+  $('works').innerHTML=[...groups].map(([name,items])=>`<div class="group"><h3>${esc(name)} · ${items.length} 张</h3><div class="works">${items.map(w=>`<article class="work"><img loading="lazy" src="${base}works/${w.id}" alt="${esc(w.name+' '+w.filename)}"><p>${esc(w.filename)}</p><button data-remove="${w.id}" aria-label="移除 ${esc(w.filename)}">移除</button></article>`).join('')}</div></div>`).join('')||'<div class="empty">还没有作品。选择身份和姓名，粘贴或上传第一张图片。</div>';
+}
+async function reloadDraft(){current=await api('state');renderWorks();renderHistory();}
+function renderHistory(){ $('history').innerHTML=current.jobs.map(j=>`<div class="history-item"><div><p>${esc(j.month)} 月报 · ${j.slide_count||0} 页 · ${esc(({success:'已完成',failed:'失败',running:'生成中',queued:'准备中',interrupted:'已中断'})[j.status])}</p><span>${esc(j.started_at.slice(0,19).replace('T',' '))}</span></div><div><button data-job="${j.id}">查看${j.status==='success'?'预览':'日志'}</button>${j.download_url?` <a class="button" href="${j.download_url}">下载</a>`:''}</div></div>`).join('')||'尚无网页生成记录。';}
+async function uploadOne(kind,file,extra={}){if(file.size>100*1024*1024)throw new Error(file.name+' 超过 100 MB');const query=new URLSearchParams({kind,filename:file.name,...extra});const response=await fetch(base+'upload?'+query,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});const result=await response.json();if(!response.ok)throw new Error(result.error);return result;}
+async function uploadWorks(files){
+  if(uploadBusy){message('uploadMessage','请等待当前上传完成。',true);return;}
+  const role=$('role').value,name=$('person').value.trim();if(!name){message('uploadMessage','请先填写作品所属人的姓名。',true);$('person').focus();return;}
+  files=[...files].filter(f=>/\.(png|jpe?g|webp)$/i.test(f.name));if(!files.length){message('uploadMessage','没有读取到图片，请复制图片内容或选择图片文件。',true);return;}
+  uploadBusy=true;updateButton();let completed=0;
+  try{for(const file of files){message('uploadMessage',`正在保存 ${name} 的作品 ${completed+1}/${files.length}…`);await uploadOne('work',file,{role,name});completed++;}message('uploadMessage',`已保存 ${name} 的 ${completed} 张作品。`);}catch(e){message('uploadMessage',`已保存 ${completed} 张；${e.message}`,true);}finally{uploadBusy=false;updateButton();await reloadDraft();}
+}
+$('chooseWorks').onclick=()=>$('worksInput').click();$('worksInput').onchange=e=>{uploadWorks(e.target.files);e.target.value='';};
+$('chooseWorkFolder').onclick=()=>$('workFolderInput').click();
+$('workFolderInput').onchange=async e=>{
+  const entries=[...e.target.files].filter(f=>/\.(png|jpe?g|webp)$/i.test(f.name)).map(file=>({file,parts:file.webkitRelativePath.split('/').slice(1)}));
+  e.target.value='';if(uploadBusy){message('uploadMessage','请等待当前上传完成。',true);return;}
+  if(!entries.length||entries.some(x=>x.parts.length<3||!['美工','设计师'].includes(x.parts[0]))){message('uploadMessage','请选择包含“美工或设计师/姓名/图片”的作品根文件夹。',true);return;}
+  uploadBusy=true;updateButton();let done=0;try{for(const entry of entries){message('uploadMessage',`正在导入作品 ${done+1}/${entries.length}…`);await uploadOne('work',entry.file,{role:entry.parts[0],name:entry.parts[1]});done++;}message('uploadMessage',`已导入 ${done} 张作品。`);}catch(err){message('uploadMessage',`已导入 ${done} 张；${err.message}`,true);}finally{uploadBusy=false;updateButton();await reloadDraft();}
+};
+document.addEventListener('paste',e=>{const files=[...(e.clipboardData?.files||[])];if(files.length){e.preventDefault();uploadWorks(files);}});
+$('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('over');};$('drop').ondragleave=()=>$('drop').classList.remove('over');$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('over');uploadWorks(e.dataTransfer.files);};
+$('works').onclick=async e=>{const button=e.target.closest('[data-remove]');if(!button)return;try{await api('works',{ids:[button.dataset.remove],active:false});await reloadDraft();}catch(err){message('uploadMessage',err.message,true);}};
+$('restore').onclick=async()=>{try{await api('works',{ids:current.works.filter(w=>!w.active).map(w=>w.id),active:true});await reloadDraft();}catch(e){message('uploadMessage',e.message,true);}};
+for(const [id,kind,target] of [['designerUpload','designer','designerPath'],['salesUpload','sales','salesPath']])$(id).onchange=async e=>{
+  const file=e.target.files[0];if(!file)return;if(uploadBusy){message('formMessage','请等待当前上传完成后重选文件。',true);e.target.value='';return;}
+  uploadBusy=true;updateButton();try{await saveSettings();message('formMessage','正在上传 '+file.name+'…');const result=await uploadOne(kind,file);$(target).value=result.path;await saveSettings();message('formMessage','已选择 '+file.name);}catch(err){message('formMessage',err.message,true);}finally{uploadBusy=false;updateButton();e.target.value='';}
+};
+$('modelsUpload').onchange=async e=>{
+  const files=[...e.target.files].filter(f=>/\.(png|jpe?g|webp)$/i.test(f.name)&&!f.webkitRelativePath.split('/').includes('thumbnails'));if(!files.length)return;
+  if(uploadBusy){message('formMessage','请等待当前上传完成后重选文件夹。',true);e.target.value='';return;}
+  const relative=f=>f.webkitRelativePath.split('/').slice(1).join('/');
+  if(files.some(f=>relative(f).split('/').length!==2)){message('formMessage','请选择包含“设计师/型号.png”的图片根文件夹。',true);e.target.value='';return;}
+  uploadBusy=true;updateButton();const batch=crypto.randomUUID();let completed=0;
+  try{await saveSettings();let root;for(const file of files){message('formMessage',`正在上传型号图片 ${completed+1}/${files.length}…`);const uploaded=await uploadOne('model',file,{batch,relative:relative(file)});root=uploaded.image_root;completed++;}$('modelsPath').value=root;await saveSettings();message('formMessage',`已保存 ${completed} 张型号图片。`);}catch(err){message('formMessage',`已上传 ${completed}/${files.length} 张；${err.message}。原图片目录保持不变，可重选整个文件夹重试。`,true);}finally{uploadBusy=false;updateButton();e.target.value='';}
+};
+for(const id of ['month','outputDir','designerSheet','salesSheet','designerPath','salesPath','modelsPath','refreshThumbs'])$(id).addEventListener('change',()=>{saveSettings().catch(()=>{});});
+async function showJob(id){selectedJob=id;clearTimeout(polling);await pollJob();}
+async function pollJob(){
+  const id=selectedJob;if(!id)return;
+  try{const job=await api('jobs/'+id);if(selectedJob!==id)return;$('resultSection').hidden=false;$('jobMessage').textContent=job.message;$('jobMessage').className=job.status==='failed'||job.status==='interrupted'?'notice error':'';$('progress').value=job.progress;
+    $('outputPath').textContent=job.status==='success'?'保存位置：'+job.output:'';$('download').hidden=!job.download_url;if(job.download_url)$('download').href=job.download_url;
+    const log=await api('jobs/'+id+'/log');if(selectedJob!==id)return;const old=$('jobLog').textContent;$('jobLog').textContent=log.text;if(old!==log.text)$('jobLog').scrollTop=$('jobLog').scrollHeight;
+    const previewKey=id+':'+job.previews.length;if($('previews').dataset.key!==previewKey){$('previews').dataset.key=previewKey;$('previews').innerHTML=job.previews.map((url,i)=>`<figure><img loading="lazy" data-preview="${url}" src="${url}" alt="第 ${i+1} 页预览"><figcaption>第 ${i+1} 页</figcaption></figure>`).join('');}
+    if(job.status==='failed'||job.status==='interrupted')$('logDetails').open=true;
+    if(job.status==='running'||job.status==='queued'){generating=true;updateButton();polling=setTimeout(pollJob,1500);}else{current=await api('state');generating=current.jobs.some(j=>['running','queued'].includes(j.status));updateButton();renderHistory();if(window.parent!==window)window.parent.postMessage({type:'monthly-ppt-completed'},location.origin);}
+  }catch(e){message('formMessage','无法读取生成状态：'+e.message+'，正在重试。',true);polling=setTimeout(pollJob,3000);}
+}
+$('generate').onclick=async()=>{if(uploadBusy||generating)return;generating=true;updateButton();message('formMessage','');try{await saveSettings();const job=await api('generate',form());$('logDetails').open=true;await showJob(job.id);$('resultSection').scrollIntoView({behavior:'smooth'});}catch(e){generating=false;updateButton();message('formMessage',e.message,true);}};
+$('history').onclick=e=>{const b=e.target.closest('[data-job]');if(!b)return;if(generating&&b.dataset.job!==selectedJob){message('formMessage','当前月报正在生成，完成后可切换查看历史月报。');return;}showJob(b.dataset.job);};
+$('previews').onclick=e=>{if(e.target.dataset.preview){$('largePreview').src=e.target.dataset.preview;$('previewDialog').showModal();}};$('closePreview').onclick=()=>$('previewDialog').close();
+async function init(){try{current=await api('state');fillSettings(current.settings);renderWorks();renderHistory();const active=current.jobs.find(j=>['running','queued'].includes(j.status));generating=!!active;updateButton();if(active||current.jobs[0])await showJob((active||current.jobs[0]).id);}catch(e){message('formMessage','加载失败：'+e.message+'。请刷新重试。',true);$('generate').disabled=true;}}
+init();
+</script>
+</body></html>

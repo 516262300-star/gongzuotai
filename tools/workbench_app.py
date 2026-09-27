@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, urlparse
 from workbench_external_status import PROJECTS, classify_log, collect_statuses, read_text_tail
 from workbench_log import LOG_PATH, configure_console
 from workbench_run import TASKS
+import monthly_ppt
 
 
 WORKBENCH_ROOT = Path(__file__).resolve().parents[1]
@@ -58,6 +59,7 @@ INDEX_HTML = r"""<!doctype html>
       --accent-weak: #eef4ff;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -881,7 +883,7 @@ INDEX_HTML = r"""<!doctype html>
             <div class="status-list" id="fileList"></div>
           </div>
         </section>
-        <section>
+        <section id="sharedRunOutput">
           <div class="output-head">
             <span class="run-state"><i class="run-dot" id="runDot"></i><span id="runStateText">运行输出</span></span>
             <span>本机 127.0.0.1</span>
@@ -973,7 +975,8 @@ INDEX_HTML = r"""<!doctype html>
     let allAgents = [];
     let allStatuses = [];
     let allTasks = [];
-    let selectedAgent = "erp_miniapp";
+    const requestedAgent = new URLSearchParams(location.search).get("agent");
+    let selectedAgent = requestedAgent && agentIcons[requestedAgent] ? requestedAgent : "erp_miniapp";
     let agentFilter = "all";
     const historyPageSize = 20;
     let historyOffset = 0;
@@ -1145,10 +1148,10 @@ INDEX_HTML = r"""<!doctype html>
         ${selectedAgent === "designer_monthly_ppt" ? `
         <div class="status-row">
           <div class="name">作品素材与 PPT 输出</div>
-          <div class="summary">在桌面助手中粘贴作品图片，并选择型号归属表、当月交易明细和型号图片文件夹。</div>
-          <div class="path">作品素材：${escapeHTML(tasks[0]?.workdir || "")}\\.build\\clipboard-portfolio</div>
+          <div class="summary">在运行页粘贴或上传作品、选择销售数据并生成月报，完成后直接预览和下载。</div>
+          <div class="path">网页资料与生成记录：D:\\desktop\\codex\\工作台\\data\\monthly-ppt</div>
           <div class="path">默认输出：D:\\desktop\\codex\\美工月会ppt\\output</div>
-          <div class="summary">实际文件位置以桌面助手中的“完整 PPT 保存位置”为准。作品展示在前，销售利润在后。</div>
+          <div class="summary">实际文件位置以网页的“PPT 保存目录”为准。作品展示在前，销售利润在后。</div>
         </div>` : ""}
       `;
       renderTasks();
@@ -1227,6 +1230,16 @@ INDEX_HTML = r"""<!doctype html>
     }
 
     function renderTasks() {
+      const monthly = selectedAgent === "designer_monthly_ppt";
+      document.querySelector("#tab-run > .panel-note").hidden = monthly;
+      document.querySelector("#tab-run > .confirm").hidden = monthly;
+      document.getElementById("sharedRunOutput").hidden = monthly;
+      if (monthly) {
+        if (!document.getElementById("monthlyPptFrame")) {
+          taskList.innerHTML = '<iframe id="monthlyPptFrame" title="美工月报 PPT 网页工作区" src="/monthly-ppt" style="width:100%;height:calc(100vh - 200px);min-height:720px;border:0" allow="clipboard-read"></iframe>';
+        }
+        return;
+      }
       const tasks = tasksForAgent(selectedAgent);
       if (!tasks.length) {
         taskList.innerHTML = `<div class="empty">当前 agent 暂无可执行任务。</div>`;
@@ -1466,6 +1479,9 @@ INDEX_HTML = r"""<!doctype html>
 
     function selectAgent(agentId) {
       selectedAgent = agentId;
+      const selectedUrl = new URL(location.href);
+      selectedUrl.searchParams.set("agent", agentId);
+      history.replaceState(null, "", selectedUrl);
       historyOffset = 0;
       agentSelect.value = agentId;
       renderAgentList();
@@ -1538,6 +1554,12 @@ INDEX_HTML = r"""<!doctype html>
       runTask(button.dataset.task, button.dataset.mode);
     });
 
+    window.addEventListener("message", event => {
+      if (event.origin === location.origin && event.data?.type === "monthly-ppt-completed") {
+        loadStatus();
+        loadHistory();
+      }
+    });
     loadStatus();
     loadHistoryAgents();
     loadTasks();
@@ -1570,6 +1592,8 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self) -> None:  # noqa: N802
+        if monthly_ppt.handle(self):
+            return
         parsed = urlparse(self.path)
         path = parsed.path
         if path == "/":
@@ -1617,6 +1641,8 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
     def do_POST(self) -> None:  # noqa: N802
+        if monthly_ppt.handle(self):
+            return
         path = urlparse(self.path).path
         if path == "/api/open-path":
             self.handle_open_path()
@@ -1838,9 +1864,11 @@ def draft_record_key(mall_id: str, goods_id: str) -> str:
 def collect_history(agent: str, limit: int = 20, offset: int = 0) -> tuple[list[HistoryEntry], int]:
     if agent == "designer_monthly_ppt":
         entries = [
-            workbench_run_history_entry(row)
-            for row in reversed(read_workbench_runs(None))
-            if row.get("script") == "designer-monthly-ppt"
+            HistoryEntry(time=str(job.get("finished_at") or job["started_at"])[:19].replace("T", " "),
+                         status={"success": "成功", "failed": "失败", "interrupted": "警告", "running": "运行中", "queued": "运行中"}.get(job["status"], "未知"),
+                         title=f"{job['month']} 美工月报", summary=job["message"], source=job["log_path"],
+                         details=[f"作品数量：{job['work_count']} 张", f"输出：{job['output']}"])
+            for job in reversed(monthly_ppt.state()["jobs"])
         ]
         return page_entries(entries, limit, offset)
 

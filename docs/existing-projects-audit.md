@@ -237,15 +237,15 @@ logs/screenshots/
 
 ## 5. 美工月报 PPT（设计师型号月报助手）
 
-源目录：`D:\desktop\codex\美工月会ppt\设计师型号月报助手`。桌面快捷方式为 `D:\desktop\设计师型号月报助手.lnk`，实际入口为源目录的 `app.ps1`。
+源目录：`D:\desktop\codex\美工月会ppt\设计师型号月报助手`，后台调用其 `run_monthly_meeting.ps1`，保留原有内容、排版和销售利润计算。
 
-- 工作台任务：`designer-monthly-ppt`，Agent：`designer_monthly_ppt`，显示名称“美工月报 PPT”。
-- 入口命令：`powershell.exe -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File .\app.ps1`，手动打开桌面窗口，没有新增计划任务。
-- 窗口调用 `run_monthly_meeting.ps1`，输入作品图片、型号归属表、交易明细、型号图片及报告月份，输出一份完整可编辑 PPT。
-- 默认输出目录：`D:\desktop\codex\美工月会ppt\output`；具体文件位置以窗口设置为准。作品页在前，销售利润页在后。
-- 状态及历史只读取工作台 `logs/script-runs.jsonl` 中本任务的启动记录，不能据此判断 PPT 已生成。
-- 工作台不读取销售数据、作品图片或 GUI 配置，也不写外部系统；源程序临时素材和设置保留在 `.build`。
-- 启动失败检查 `app.ps1` 和源目录是否存在；生成失败按桌面窗口提示修复数据后重试。源项目 `README.md` 保留详细使用说明。
+- 工作台 Agent：`designer_monthly_ppt`，显示名称“美工月报 PPT”；直接入口 `http://127.0.0.1:8787/?agent=designer_monthly_ppt`。
+- 工作区由 `tools/monthly_ppt.html` 和 `tools/monthly_ppt.py` 提供，所有作品录入、Excel 上传、图片文件夹选择、生成、日志、预览和下载均在网页完成，不打开桌面助手。
+- 原 `designer-monthly-ppt` 桌面启动任务已移除。网页生成不需要 EXECUTE，仍为手动操作，没有定时任务。
+- 首次导入旧设置和作品，后续使用工作台 `data/monthly-ppt/state.json`；移除作品只设置排除标记，可恢复原选择。
+- 每次任务保存独立的作品快照、构建目录和日志，通过 `-BuildDirectory` 参数隔离临时数据；默认输出到源项目上级的 `output`，文件名附加时间和任务 ID，避免覆盖旧报告。
+- 状态和历史读取实际生成结果，统一日志 script 为 `designer-monthly-ppt-web`。生成完成后校验 PPT 完整性与页面，再提供下载。
+- 刷新网页可以恢复生成进度；生成失败展开日志，修正输入后重试。工作台服务重启时未完成任务标为“已中断”。资料、日志和作品均留在本机并已从 Git 排除。
 
 ## 工作台真实依赖关系
 
@@ -329,7 +329,7 @@ http://127.0.0.1:8787/
 | 拼多多周报 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report\logs` |
 | 拼多多自动上架 | `D:\desktop\codex\拼多多自动上架\.tmp_tool\saved_draft_history.json` |
 | 小程序 ERP 自动上架 | `D:\desktop\codex\小程序自动上架\erp_auto_upload\logs` |
-| 美工月报 PPT | 工作台 `logs/script-runs.jsonl` 中 `designer-monthly-ppt` 的启动记录 |
+| 美工月报 PPT | 工作台 `data/monthly-ppt/state.json` 中的生成记录及 `jobs/<任务ID>/generation.log` |
 
 拼多多自动上架历史页按保存草稿记录分页展示 `saved_draft_history.json` 的全部内容；每条记录会显示商品标题、店铺名、店铺 ID、商品 ID、记录键、商品链接和素材路径，便于长期核对每次保存后的店铺与商品。
 

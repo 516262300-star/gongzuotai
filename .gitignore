@@ -5,6 +5,7 @@
 
 # Local runtime outputs
 data/output/
+data/monthly-ppt/
 projects/*/data/output/
 logs/
 *.log
@@ -18,4 +19,3 @@ venv/
 node_modules/
 dist/
 build/
-

@@ -1,10 +1,11 @@
 scripts:
-  - id: designer-monthly-ppt
+  - id: designer-monthly-ppt-web
     project: designer-monthly-ppt
-    name: 美工月报 PPT（设计师型号月报助手）
-    script: D:\desktop\codex\美工月会ppt\设计师型号月报助手\app.ps1
-    command: powershell.exe -NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File .\app.ps1
-    workdir: D:\desktop\codex\美工月会ppt\设计师型号月报助手
+    name: 美工月报 PPT 网页生成
+    script: tools\monthly_ppt.py
+    command: 网页填写资料后通过同源接口后台调用 run_monthly_meeting.ps1
+    local_url: http://127.0.0.1:8787/?agent=designer_monthly_ppt
+    workdir: D:\desktop\codex\工作台
     status_command: python tools\workbench_external_status.py --project designer_monthly_ppt
     writes_external_system: false
 

@@ -10,7 +10,7 @@
 | Notion 拼多多周报生成器 | `D:\desktop\codex\notion拼多多周报\pdd_weekly_report` | 已存在 | 汇总店铺概况、消费者体验、7 店广告与盈亏，生成完整 Notion 周报页面。 |
 | 拼多多自动上架工具 | `D:\desktop\codex\拼多多自动上架` | 已存在 | 使用 ERP 优质价和图片空间素材生成拼多多上架包，并辅助后台保存草稿。 |
 | 小程序 ERP 自动上架商品工具 | `D:\desktop\codex\小程序自动上架\erp_auto_upload` | 已存在 | 使用本地素材目录在公司自研 ERP 后台新建商品，默认停在保存前。 |
-| 美工月报 PPT（设计师型号月报助手） | `D:\desktop\codex\美工月会ppt\设计师型号月报助手` | 已接入 | 启动桌面助手，录入作品并结合型号销售利润，生成一份可编辑 PPT。 |
+| 美工月报 PPT | `D:\desktop\codex\美工月会ppt\设计师型号月报助手` | 已接入 | 在工作台网页录入作品和销售数据、生成、预览与下载可编辑 PPT。 |
 
 ## 目录说明
 
@@ -146,18 +146,20 @@ python tools/workbench_status.py --script script_name.py
 
 ## 美工月报 PPT
 
-打开 `http://127.0.0.1:8787/`，左侧选择“美工月报 PPT”，点击“预览”，再输入 `EXECUTE` 并点击“执行”。工作台会打开桌面上的“设计师型号月报助手”，保留原有粘贴作品、选择数据和生成完整 PPT 的流程。启动时隐藏控制台，桌面助手窗口正常显示。
+打开 `http://127.0.0.1:8787/`，左侧选择“美工月报 PPT”，在“运行”页直接完成：
 
-也可以从工作台目录运行：
+1. 选择报告月份，按身份和姓名粘贴、拖入或上传作品；也可导入按“美工或设计师/姓名/图片”分类的作品根文件夹。
+2. 上传型号归属表和当月交易明细（`.xlsx/.xlsm`），选择型号图片根文件夹，或沿用网页中显示的已有资料。
+3. 确认保存目录和工作表名称，点击“生成完整月报 PPT”。这里无需输入 `EXECUTE`，不会打开桌面脚本窗口。
+4. 网页显示阶段进度和日志，完成后可以逐页预览、放大和下载 PPT。历史月报可再次预览和下载。
 
-```powershell
-python tools\workbench_run.py designer-monthly-ppt --dry-run
-python tools\workbench_run.py designer-monthly-ppt --execute
-```
+首次使用带入原助手的设置及作品；后续网页资料独立保存在 `data/monthly-ppt/state.json`。作品移除只改变选中状态，可恢复，不删除原图片。每次任务快照所选作品，使用独立构建目录，输出文件名带时间和任务标识，避免覆盖原月报。默认输出目录为 `D:\desktop\codex\美工月会ppt\output`，可在网页修改。
 
-输入包括作品图片、型号归属表、当月交易明细、型号图片文件夹和月份。最终仅生成一份可编辑 PPT，作品展示在前，销售利润在后；默认保存到 `D:\desktop\codex\美工月会ppt\output`，实际以助手中“完整 PPT 保存位置”为准。
+后台复用 `run_monthly_meeting.ps1` 并传入 `-BuildDirectory`，保留原有排版和计算逻辑。最终一份可编辑 PPT 包含前半部分作品展示和后半部分型号销售利润。单文件上传上限 100 MB。生成只在本机执行，不新增定时任务或凭据，也不写外部系统。刷新网页后可恢复进度，同一时间只允许一个月报生成任务。
 
-该工具为手动运行，不新增定时任务，不需要工作台配置凭据，也不写外部系统。状态及历史读取 `logs/script-runs.jsonl` 中的 `designer-monthly-ppt` 启动记录，成功仅表示已启动进程，PPT 生成结果在桌面助手中查看。生成失败按助手提示修正输入后重试，临时文件保留在源项目 `.build` 中；若入口丢失，恢复源项目的 `app.ps1`。使用步骤见源项目 `README.md`。
+状态与历史现在展示真实的生成结果；PPT 经过 ZIP 完整性和页面检查后才提供下载。任务日志及预览存放在 `data/monthly-ppt/jobs/<任务ID>/`，统一记录写到 `logs/script-runs.jsonl`，script 为 `designer-monthly-ppt-web`。资料和生成文件已从 Git 排除。服务中断的任务标为“已中断”，重新生成即可；其他错误可展开生成日志，修正输入后重试。旧桌面启动任务已从工作台移除。
+
+网页和后端分别为 `tools/monthly_ppt.html`、`tools/monthly_ppt.py`；后端通过 `workbench_app.py` 提供同源接口。相关测试：`python -m unittest discover -s tests -v`。
 
 ## 凭据约定
 
