@@ -32,6 +32,16 @@ class Task:
 
 
 TASKS: dict[str, Task] = {
+    "erp-client-login": Task(
+        id="erp-client-login", name="ERP 客户端登录", project="workbench",
+        workdir=str(WORKBENCH_ROOT), command=r"python tools\erp_desktop_auth.py login",
+        writes_external_system=False, description="通过 Leedis 客户端登录，授权由本人完成。",
+    ),
+    "erp-client-open": Task(
+        id="erp-client-open", name="打开 ERP 系统 / 检查登录", project="workbench",
+        workdir=str(WORKBENCH_ROOT), command=r"python tools\erp_desktop_auth.py check",
+        writes_external_system=False, description="复用 Leedis 客户端登录并只读检查 ERP 网页会话。",
+    ),
     "status": Task(
         id="status",
         name="工作台外部项目状态",
@@ -101,7 +111,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--date", help="广告同步单日日期，格式 YYYY-MM-DD。")
     parser.add_argument("--range", dest="date_range", help="广告同步日期范围，格式 YYYY-MM-DD~YYYY-MM-DD。")
     parser.add_argument("--store", help="广告同步店铺，支持 all 或逗号分隔店铺 ID。")
-    parser.add_argument("--relogin", action="store_true", help="广告同步时强制重新登录 ERP。")
+    parser.add_argument("--relogin", action="store_true", help="广告同步时通过客户端刷新 ERP 网页登录态。")
     parser.add_argument("--check-only", action="store_true", help="广告同步只抓取检查，不写入 Notion。")
     return parser.parse_args()
 

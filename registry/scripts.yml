@@ -89,3 +89,6 @@ scripts:
     workdir: D:\desktop\codex\小程序自动上架\erp_auto_upload
     status_command: 查看 D:\desktop\codex\小程序自动上架\erp_auto_upload\logs
     writes_external_system: false
+
+# ERP 登录（2026-09-30）：四个业务项目统一复用 Leedis 客户端。
+# 安装及恢复：README.md 的 ERP 客户端登录章节。旧 ERP 账号密码与独立会话不再读取。

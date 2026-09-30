@@ -124,7 +124,7 @@ powershell -ExecutionPolicy Bypass -File tools\workbench_autostart.ps1 -Mode Uni
 
 自动启动使用 Windows 计划任务 `CodexWorkbenchApp`，触发条件是当前用户登录 Windows，并每 5 分钟守护检查一次。计划任务通过 `tools\workbench_autostart.vbs` 静默调用 `tools\workbench_autostart.ps1 -Mode Ensure`，避免 Windows Terminal 弹出黑色窗口；如果 `127.0.0.1:8787` 已经有工作台服务在监听，就直接退出；如果没有监听，就后台启动 `tools\workbench_app.py`。计划任务自身日志写入 `logs\workbench_autostart.log`，网页服务输出写入 `logs\workbench_app_stdout.log` 和 `logs\workbench_app_stderr.log`。
 
-网页现在采用 Agent 详情工作区布局：左侧是 Agent 列表和搜索，右侧展示当前选中 Agent 的状态摘要、运行、历史、日志和文件信息。运行页只显示当前 Agent 相关任务，执行前可先预览命令；除 `status` 外真实执行都需要输入 `EXECUTE`。任务运行中会锁定执行按钮、显示已运行秒数，并像桌面脚本一样实时滚动显示 stdout/stderr 输出。运行输出会自动兼容 UTF-8 和 Windows GBK/cp936，避免中文日志在网页里乱码。
+网页现在采用 Agent 详情工作区布局：左侧是 Agent 列表和搜索，右侧展示当前选中 Agent 的状态摘要、运行、历史、日志和文件信息。运行页只显示当前 Agent 相关任务，执行前可先预览命令；除 `status`、客户端登录与打开系统外，真实执行都需要输入 `EXECUTE`。任务运行中会锁定执行按钮、显示已运行秒数，并像桌面脚本一样实时滚动显示 stdout/stderr 输出。运行输出会自动兼容 UTF-8 和 Windows GBK/cp936，避免中文日志在网页里乱码。
 
 网页里的 `Agent 历史记录` 下拉框可以查看：
 
@@ -160,6 +160,27 @@ python tools/workbench_status.py --script script_name.py
 状态与历史现在展示真实的生成结果；PPT 经过 ZIP 完整性和页面检查后才提供下载。任务日志及预览存放在 `data/monthly-ppt/jobs/<任务ID>/`，统一记录写到 `logs/script-runs.jsonl`，script 为 `designer-monthly-ppt-web`。资料和生成文件已从 Git 排除。服务中断的任务标为“已中断”，重新生成即可；其他错误可展开生成日志，修正输入后重试。旧桌面启动任务已从工作台移除。
 
 网页和后端分别为 `tools/monthly_ppt.html`、`tools/monthly_ppt.py`；后端通过 `workbench_app.py` 提供同源接口。相关测试：`python -m unittest discover -s tests -v`。
+
+## ERP 客户端登录（2026-09-30）
+
+ERP 统一复用 **Leedis 桌面客户端**。先在客户端完成登录，任务通过客户端“打开系统”取得专用 ERP Chrome 的网页登录态；不再读取 ERP_USERNAME、ERP_PHONE、ERP_PASSWORD，也不回退账号密码或脚本扫码登录。客户端凭据仍由客户端和 Windows 凭据管理器保管。任务只在内存使用 ldswj.net 的网站 Cookie，不再读取旧 `.auth/session.json`、`.erp_session.bin` 或 `states/erp.json`。
+
+本机已配置客户端。换电脑时安装 LeedisClient.exe、Google Chrome 和项目 requirements.txt，然后运行工作台仓库的安装命令（替换成实际客户端路径）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/setup_erp_client.ps1 -ClientExe "D:\desktop\客户端登录\Leedis-Windows\LeedisClient.exe"
+```
+
+配置保存在 `%LOCALAPPDATA%/LeedisDesktop/workbench-config.json`，只记录客户端路径；也可用 `ERP_CLIENT_EXE` 覆盖路径。安装脚本生成客户端需要的 `%USERPROFILE%/Desktop/ERP Chrome.lnk`，使用独立浏览器目录 `%LOCALAPPDATA%/LeedisDesktop/erp-chrome` 和本机 9222 端口。已有配置和快捷方式先备份再更新。网站登录态属于敏感本机数据，不提交到 GitHub。
+
+客户端尚未运行时自动启动并尝试恢复已有登录；未登录、客户端忙、9222 不可用或登录过期无法恢复时，任务失败并显示提示。请在客户端登录后重试原任务；不会自动尝试账号密码，不会关闭客户端或 ERP Chrome。自动任务仍需在已登录 Windows 的同一用户会话下执行。切换客户端账号后，应结束当前任务并重新运行。
+
+```powershell
+python tools/erp_desktop_auth.py login  # 客户端登录，需要授权时由本人完成
+python tools/erp_desktop_auth.py check  # 打开系统并只读检查网页会话
+```
+
+公共接入代码维护源为工作台 `tools/erp_desktop_auth.py`；各业务仓库包含同版副本，可独立运行。更新公共模块时同步四个业务副本。升级无需移植旧网页 Cookie，旧密码配置可自行删除，程序已不再使用。
 
 ## 凭据约定
 

@@ -941,6 +941,8 @@ INDEX_HTML = r"""<!doctype html>
     };
     const statusOrder = ["成功", "失败", "警告", "未运行"];
     const taskAgent = {
+      "erp-client-login": "workbench",
+      "erp-client-open": "workbench",
       "status": "workbench",
       "pdd-ads-catchup": "pdd_ads",
       "pdd-ads-sync-all": "pdd_ads",
@@ -1266,7 +1268,15 @@ INDEX_HTML = r"""<!doctype html>
           </div>
         </div>
       `).join("");
-      taskList.innerHTML = adsPanel + runPanel + genericTaskRows;
+      const erpPanel = ["pdd_ads", "pdd_weekly", "pdd_publisher", "erp_miniapp"].includes(selectedAgent) ? `
+        <div class="task-row"><div class="name">ERP 客户端登录</div>
+          <div class="summary">复用 Leedis 客户端当前账号。首次使用或登录失效时，在客户端完成授权后再运行任务。</div>
+          <div class="task-actions">
+            <button data-task="erp-client-login" data-mode="execute">客户端登录</button>
+            <button data-task="erp-client-open" data-mode="execute">打开系统 / 检查登录</button>
+          </div>
+        </div>` : "";
+      taskList.innerHTML = erpPanel + adsPanel + runPanel + genericTaskRows;
     }
 
     function renderRunPanel(tasks) {
@@ -1308,7 +1318,7 @@ INDEX_HTML = r"""<!doctype html>
       return `
         <div class="ads-panel">
           <h4>拼多多广告数据同步</h4>
-          <div class="summary">默认同步一到七店。ERP 登录过期时会优先用 .env 里的账号密码自动登录，失败时再按日志提示处理。</div>
+          <div class="summary">默认同步一到七店。ERP 统一复用 Leedis 客户端登录；未登录时请先点击“客户端登录”。</div>
           <div class="ads-form">
             <div class="field">
               <label for="adsSingleDate">单日日期</label>
@@ -1344,7 +1354,7 @@ INDEX_HTML = r"""<!doctype html>
             <button data-ads-action="yesterday" type="button">同步昨天</button>
             <button data-ads-action="single" type="button">同步单日</button>
             <button data-ads-action="range" type="button">同步日期范围</button>
-            <button data-ads-action="relogin" type="button">重新登录并同步</button>
+            <button data-ads-action="relogin" type="button">刷新客户端登录并同步</button>
             <div class="right-actions">
               <button data-ads-action="stop" type="button">停止当前运行</button>
               <button data-ads-action="open-log" type="button">打开日志文件夹</button>
@@ -1669,7 +1679,7 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         if mode not in {"dry-run", "execute"}:
             self.send_json({"error": f"未知模式：{mode}"}, HTTPStatus.BAD_REQUEST)
             return
-        if mode == "execute" and task_id != "status" and confirm != "EXECUTE":
+        if mode == "execute" and task_id not in {"status", "erp-client-login", "erp-client-open"} and confirm != "EXECUTE":
             self.send_json({"error": "执行真实任务前需要输入 EXECUTE。"}, HTTPStatus.BAD_REQUEST)
             return
 

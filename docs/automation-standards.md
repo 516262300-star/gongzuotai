@@ -73,13 +73,14 @@ PDD_CLIENT_ID=
 PDD_CLIENT_SECRET=
 PDD_ACCESS_TOKEN=
 ERP_BASE_URL=
-ERP_USERNAME=
-ERP_PASSWORD=
+ERP_CLIENT_EXE=
 ADS_ACCOUNT_ID=
 ADS_ACCESS_TOKEN=
 ```
 
 真实值只能写入本地 `.env` 或系统环境变量，提交仓库的只能是 `.env.example`。
+
+ERP 相关任务使用 Leedis 客户端登录；不配置 ERP_USERNAME、ERP_PHONE、ERP_PASSWORD。详见 README 的 ERP 客户端登录章节。
 
 ## 上线前检查
 

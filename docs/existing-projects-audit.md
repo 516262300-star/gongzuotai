@@ -161,7 +161,7 @@ http://127.0.0.1:8765/
 
 ```text
 config.example.yaml -> config.yaml
-ERP_USERNAME / ERP_PASSWORD 环境变量
+Leedis 桌面客户端登录（ERP_CLIENT_EXE 可覆盖客户端路径）
 states/*.json 登录态
 ```
 
@@ -215,8 +215,7 @@ python main.py upload --material-root "素材目录" --save
 ```text
 .env.example -> .env
 ERP_LOGIN_URL
-ERP_USERNAME
-ERP_PASSWORD
+ERP_CLIENT_EXE
 ERP_HOME_URL
 BROWSER_CHANNEL
 MATERIAL_ROOT
@@ -340,3 +339,7 @@ http://127.0.0.1:8787/
 - SKU 行数、主图/原图/详情图/尺寸图/视频上传统计。
 - 最近 warning 和最近截图路径。
 - 状态卡只用最后一次 ERP 运行片段判断成功或失败，避免同一个 `run_YYYYMMDD.log` 里更早的失败关键词污染后续成功结果。
+
+## 2026-09-30 ERP 登录调整
+
+四个 ERP 项目现统一复用 Leedis 桌面客户端，旧网页会话文件和账号密码配置不再作为认证来源。配置、恢复和验证步骤见工作台 README；各业务 README 已同步。
