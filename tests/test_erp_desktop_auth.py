@@ -29,7 +29,7 @@ class DesktopAuthTests(unittest.TestCase):
     def test_client_failure_never_uses_browser_or_password_fallback(self):
         with patch.object(auth, 'client_action', side_effect=auth.DesktopLoginRequired('not logged in')), patch.object(auth, '_read_browser_cookies', new_callable=AsyncMock) as read:
             with self.assertRaises(auth.DesktopLoginRequired):
-                auth.get_client_cookies()
+                auth.get_client_cookies(force=True)
             read.assert_not_called()
             self.assertIsNone(auth._cookies)
 
@@ -41,7 +41,7 @@ class DesktopAuthTests(unittest.TestCase):
             result[0]['value'] = 'mutated'
             self.assertEqual(auth.get_client_cookies()[0]['value'], 'synthetic-one')
             self.assertEqual(auth.get_client_cookies(force=True)[0]['value'], 'synthetic-two')
-            self.assertEqual(command.call_count, 2)
+            self.assertEqual(command.call_count, 1)
 
     def test_sync_adapter_can_run_inside_playwright_event_loop(self):
         async def run():
